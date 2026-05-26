@@ -1,43 +1,75 @@
-async function callOpenAI(messages){
+const API_URL =
+"https://tutor-evolutivo-ai.onrender.com"
+
+async function getCourses(){
 
   try{
 
-    const response = await fetch(
-      "https://tutor-evolutivo-ai.onrender.com/chat",
-      {
-        method:"POST",
-
-        headers:{
-          "Content-Type":"application/json"
-        },
-
-        body:JSON.stringify({
-          messages
-        })
-      }
+    const response =
+    await fetch(
+      `${API_URL}/courses`
     )
 
-    if(!response.ok){
+    const data =
+    await response.json()
 
-      throw new Error(
-        "Erro conexão servidor"
-      )
-
-    }
-
-    const data = await response.json()
-
-    return data.choices[0].message.content
+    return data.data || []
 
   }catch(error){
 
     console.error(error)
 
-    return `
-      Desculpe.
-      O servidor encontrou um erro.
-    `
+    return []
 
   }
 
 }
+
+async function renderCourses(){
+
+  const container =
+  document.getElementById(
+    "coursesContainer"
+  )
+
+  if(!container) return
+
+  try{
+
+    const courses =
+    await getCourses()
+
+    container.innerHTML =
+    courses.slice(0,6).map(course => `
+
+      <div class="resource">
+
+        <div class="resource-title">
+          ${course.title || "Curso"}
+        </div>
+
+        <div class="resource-desc">
+          ${course.summary || "Curso"}
+        </div>
+
+        <a
+          class="resource-btn"
+          target="_blank"
+          href="${course.banner || "#"}"
+        >
+          Abrir Curso
+        </a>
+
+      </div>
+
+    `).join("")
+
+  }catch(error){
+
+    console.error(error)
+
+  }
+
+}
+
+renderCourses()
