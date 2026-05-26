@@ -11,7 +11,10 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
+// ================================
 // FRONTEND
+// ================================
+
 app.use(express.static("."))
 
 app.get("/", (req,res)=>{
@@ -23,7 +26,7 @@ app.get("/", (req,res)=>{
 })
 
 // ================================
-// OPENAI CHAT
+// GROK AI CHAT
 // ================================
 
 app.post("/chat", async (req,res)=>{
@@ -34,7 +37,7 @@ app.post("/chat", async (req,res)=>{
 
     const response =
     await fetch(
-      "https://api.openai.com/v1/chat/completions",
+      "https://api.x.ai/v1/chat/completions",
       {
 
         method:"POST",
@@ -43,12 +46,12 @@ app.post("/chat", async (req,res)=>{
           "Content-Type":"application/json",
 
           "Authorization":
-          `Bearer ${process.env.OPENAI_API_KEY}`
+          `Bearer ${process.env.XAI_API_KEY}`
         },
 
         body:JSON.stringify({
 
-          model:"gpt-4.1-mini",
+          model:"grok-3-mini",
 
           messages,
 
@@ -111,6 +114,10 @@ app.get("/courses", async (req,res)=>{
   }
 
 })
+
+// ================================
+// SERVER
+// ================================
 
 const PORT =
 process.env.PORT || 3000
