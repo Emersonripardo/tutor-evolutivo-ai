@@ -12,6 +12,7 @@ async function callOpenAI(userMessage){
     const response = await fetch(
       "/chat",
       {
+
         method:"POST",
 
         headers:{
@@ -61,6 +62,8 @@ prática e testes
 
           ],
 
+          model:"gpt-4.1-mini",
+
           temperature:0.7
 
         })
@@ -68,11 +71,19 @@ prática e testes
       }
     )
 
+    if(!response.ok){
+
+      throw new Error("Erro API")
+
+    }
+
     const data =
     await response.json()
 
     const aiResponse =
-    data.choices[0].message.content
+    data?.choices?.[0]?.message?.content
+    ||
+    "Não consegui responder agora."
 
     conversationHistory.push({
       role:"assistant",
