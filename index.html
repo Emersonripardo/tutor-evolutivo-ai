@@ -507,7 +507,36 @@ function buildNextSession(){
   const user = state.userData
   return `Estudar por ${user.time || "15 minutos"} no período de maior energia (${user.bestTime || "horário ideal"}), usando ${user.learningStyle || "prática guiada"}.`
 }
+let inactivityTimer
+  function resetInactivity(){
 
+clearTimeout(inactivityTimer)
+
+inactivityTimer = setTimeout(()=>{
+
+state.chatHistory.push({
+
+role:"assistant",
+
+content:`
+Percebi que você desacelerou.
+
+Quer que eu:
+- simplifique sua sessão,
+- transforme em podcast,
+- reduza a dificuldade,
+- crie revisão rápida?
+`
+
+})
+
+save()
+
+renderDashboard()
+
+},20000)
+
+}
 function renderDashboard(){
   const user = state.userData
 
