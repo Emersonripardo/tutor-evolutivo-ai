@@ -1,75 +1,105 @@
-const API_URL =
-"https://tutor-evolutivo-ai.onrender.com"
+let conversationHistory = []
 
-async function getCourses(){
+async function callOpenAI(userMessage){
 
   try{
 
-    const response =
-    await fetch(
-      `${API_URL}/courses`
+    conversationHistory.push({
+      role:"user",
+      content:userMessage
+    })
+
+    const response = await fetch(
+      "/chat",
+      {
+        method:"POST",
+
+        headers:{
+          "Content-Type":"application/json"
+        },
+
+        body:JSON.stringify({
+
+          messages:[
+
+            {
+              role:"system",
+
+              content:`
+
+Você é um tutor educacional de elite.
+
+Seu objetivo é:
+
+- ensinar profundamente
+- explicar de forma simples
+- agir como professor humano
+- usar exemplos reais
+- usar analogias
+- ensinar passo a passo
+- adaptar a explicação ao aluno
+- recomendar exercícios
+- incentivar o aluno
+
+REGRAS IMPORTANTES:
+
+- nunca responda curto
+- sempre explique detalhadamente
+- use listas
+- use exemplos reais
+- use linguagem amigável
+- use markdown
+- sempre tente ensinar melhor
+
+O aluno aprende melhor com:
+prática e testes
+
+`
+            },
+
+            ...conversationHistory
+
+          ],
+
+          temperature:0.7
+
+        })
+
+      }
     )
 
     const data =
     await response.json()
 
-    return data.data || []
+    const aiResponse =
+    data.choices[0].message.content
+
+    conversationHistory.push({
+      role:"assistant",
+      content:aiResponse
+    })
+
+    return formatAIResponse(aiResponse)
 
   }catch(error){
 
     console.error(error)
 
-    return []
-
+    return `
+      Ocorreu um erro na IA.
+    `
   }
 
 }
 
-async function renderCourses(){
+function formatAIResponse(text){
 
-  const container =
-  document.getElementById(
-    "coursesContainer"
-  )
+  return text
 
-  if(!container) return
+    .replace(/\*\*(.*?)\*\*/g,"<b>$1</b>")
 
-  try{
+    .replace(/\*(.*?)\*/g,"<i>$1</i>")
 
-    const courses =
-    await getCourses()
-
-    container.innerHTML =
-    courses.slice(0,6).map(course => `
-
-      <div class="resource">
-
-        <div class="resource-title">
-          ${course.title || "Curso"}
-        </div>
-
-        <div class="resource-desc">
-          ${course.summary || "Curso"}
-        </div>
-
-        <a
-          class="resource-btn"
-          target="_blank"
-          href="${course.banner || "#"}"
-        >
-          Abrir Curso
-        </a>
-
-      </div>
-
-    `).join("")
-
-  }catch(error){
-
-    console.error(error)
-
-  }
+    .replace(/\n/g,"<br><br>")
 
 }
-
-renderCourses()
