@@ -1,4 +1,4 @@
-async function getCourses(){
+ async function getCourses(){
 
   try{
 
@@ -32,6 +32,8 @@ async function renderCourses(){
     const courses =
     await getCourses()
 
+    console.log(courses)
+
     container.innerHTML =
     courses.slice(0,6).map(course => `
 
@@ -39,6 +41,7 @@ async function renderCourses(){
         class="resource"
         style="
           margin-bottom:20px;
+          overflow:hidden;
         "
       >
 
@@ -47,7 +50,7 @@ async function renderCourses(){
           alt="${course.title || 'Curso'}"
           style="
             width:100%;
-            height:160px;
+            height:180px;
             object-fit:cover;
             border-radius:14px;
             margin-bottom:14px;
@@ -81,7 +84,12 @@ async function renderCourses(){
 
         <a
           class="resource-btn"
-          href="https://cefis.com.br"
+          href="${
+            course.url ||
+            course.link ||
+            course.permalink ||
+            '#'
+          }"
           target="_blank"
           style="
             display:inline-block;
