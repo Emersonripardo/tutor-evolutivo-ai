@@ -1,54 +1,134 @@
-async function getCourses() {}
-async function getLessons() {}
-async function getSubtitles() {}
+const API_URL =
+"https://tutor-evolutivo-ai.onrender.com"
+
+// =====================================================
+// PEGAR CURSOS
+// =====================================================
+
 async function getCourses(){
 
-  return [
+  try{
 
-    {
-      title:"Contabilidade Empresarial",
-      description:"Aprenda contabilidade do zero."
-    },
+    const response =
+    await fetch(
+      `${API_URL}/courses`
+    )
 
-    {
-      title:"ICMS na prática",
-      description:"Curso completo sobre ICMS e tributação."
-    },
+    const data =
+    await response.json()
 
-    {
-      title:"Departamento Fiscal",
-      description:"Entenda impostos e obrigações fiscais."
-    },
+    return data.data || []
 
-    {
-      title:"Excel para empresas",
-      description:"Automatize planilhas e relatórios."
-    },
+  }catch(error){
 
-    {
-      title:"Auditoria Financeira",
-      description:"Aprenda auditoria profissional."
-    },
+    console.error(
+      "Erro cursos:",
+      error
+    )
 
-    {
-      title:"Gestão Empresarial",
-      description:"Administração e crescimento."
-    }
+    // FALLBACK MOCK
+    return [
 
-  ]
+      {
+        title:"Contabilidade Empresarial",
+        description:"Aprenda contabilidade do zero."
+      },
+
+      {
+        title:"ICMS na prática",
+        description:"Curso completo sobre ICMS."
+      },
+
+      {
+        title:"Departamento Fiscal",
+        description:"Entenda impostos."
+      }
+
+    ]
+
+  }
 
 }
+
+// =====================================================
+// PEGAR AULAS
+// =====================================================
+
+async function getLessons(courseId){
+
+  try{
+
+    const response =
+    await fetch(
+      `${API_URL}/lessons/${courseId}`
+    )
+
+    const data =
+    await response.json()
+
+    return data.data || []
+
+  }catch(error){
+
+    console.error(
+      "Erro lessons:",
+      error
+    )
+
+    return []
+
+  }
+
+}
+
+// =====================================================
+// PEGAR LEGENDAS
+// =====================================================
+
+async function getSubtitles(lessonId){
+
+  try{
+
+    const response =
+    await fetch(
+      `${API_URL}/subtitles/${lessonId}`
+    )
+
+    const data =
+    await response.json()
+
+    return data.data || []
+
+  }catch(error){
+
+    console.error(
+      "Erro subtitles:",
+      error
+    )
+
+    return []
+
+  }
+
+}
+
+// =====================================================
+// RENDERIZAR CURSOS
+// =====================================================
 
 async function renderCourses(){
 
   const container =
-  document.getElementById("coursesContainer")
+  document.getElementById(
+    "coursesContainer"
+  )
 
   if(!container) return
 
   try{
 
-    const courses = await getCourses()
+    const courses =
+    await getCourses()
 
     container.innerHTML =
     courses.slice(0,6).map(course => `
