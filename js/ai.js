@@ -1,5 +1,12 @@
 const OPENAI_API_KEY =
+localStorage.getItem("openai_key")
+||
 prompt("Cole sua OpenAI API Key")
+
+localStorage.setItem(
+"openai_key",
+OPENAI_API_KEY
+)
 
 async function callOpenAI(messages){
 
