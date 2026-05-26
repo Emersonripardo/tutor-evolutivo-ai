@@ -1,18 +1,9 @@
-const API_URL =
-"https://tutor-evolutivo-ai.onrender.com"
-
-// =====================================================
-// PEGAR CURSOS
-// =====================================================
-
 async function getCourses(){
 
   try{
 
     const response =
-    await fetch(
-      `${API_URL}/courses`
-    )
+    await fetch("/courses")
 
     const data =
     await response.json()
@@ -21,107 +12,18 @@ async function getCourses(){
 
   }catch(error){
 
-    console.error(
-      "Erro cursos:",
-      error
-    )
-
-    // FALLBACK MOCK
-    return [
-
-      {
-        title:"Contabilidade Empresarial",
-        description:"Aprenda contabilidade do zero."
-      },
-
-      {
-        title:"ICMS na prática",
-        description:"Curso completo sobre ICMS."
-      },
-
-      {
-        title:"Departamento Fiscal",
-        description:"Entenda impostos."
-      }
-
-    ]
-
-  }
-
-}
-
-// =====================================================
-// PEGAR AULAS
-// =====================================================
-
-async function getLessons(courseId){
-
-  try{
-
-    const response =
-    await fetch(
-      `${API_URL}/lessons/${courseId}`
-    )
-
-    const data =
-    await response.json()
-
-    return data.data || []
-
-  }catch(error){
-
-    console.error(
-      "Erro lessons:",
-      error
-    )
+    console.error(error)
 
     return []
 
   }
 
 }
-
-// =====================================================
-// PEGAR LEGENDAS
-// =====================================================
-
-async function getSubtitles(lessonId){
-
-  try{
-
-    const response =
-    await fetch(
-      `${API_URL}/subtitles/${lessonId}`
-    )
-
-    const data =
-    await response.json()
-
-    return data.data || []
-
-  }catch(error){
-
-    console.error(
-      "Erro subtitles:",
-      error
-    )
-
-    return []
-
-  }
-
-}
-
-// =====================================================
-// RENDERIZAR CURSOS
-// =====================================================
 
 async function renderCourses(){
 
   const container =
-  document.getElementById(
-    "coursesContainer"
-  )
+  document.getElementById("coursesContainer")
 
   if(!container) return
 
@@ -140,8 +42,16 @@ async function renderCourses(){
         </div>
 
         <div class="resource-desc">
-          ${course.description || "Curso recomendado"}
+          ${course.summary || "Curso recomendado"}
         </div>
+
+        <a
+          class="resource-btn"
+          href="https://cefis.com.br"
+          target="_blank"
+        >
+          Abrir curso
+        </a>
 
       </div>
 
