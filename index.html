@@ -695,50 +695,43 @@
         </form>
       </section>
 
-      <aside class="side-panel">
-        <div class="small-card card">
-          <h3 style="margin-bottom:16px;">📈 Sua evolução</h3>
-          <p style="color:var(--muted)">Consistência semanal</p>
-          <div class="progress-bar" role="progressbar" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100">
-            <div class="progress"></div>
-          </div>
-        </div>
+     <aside class="side-panel">
 
-        <div class="small-card card">
-          <h3 style="margin-bottom:18px;">🎥 Conteúdos recomendados</h3>
-          <div id="coursesContainer"></div>
+  <div class="small-card card">
 
-          <div class="resource">
-            <div class="resource-title">Como funciona ICMS-ST na prática</div>
-            <div class="resource-desc">Vídeo prático explicando substituição tributária de forma simples.</div>
-            <a class="resource-btn" target="_blank" rel="noopener noreferrer" href="https://www.youtube.com/results?search_query=ICMS+ST">
-              Assistir vídeo
-            </a>
-          </div>
+    <h3 style="margin-bottom:16px;">
+      📈 Sua evolução
+    </h3>
 
-          <div class="resource">
-            <div class="resource-title">Resumo Inteligente PDF</div>
-            <div class="resource-desc">Resumo criado automaticamente pela IA para revisão rápida.</div>
-            <a class="resource-btn" href="#" onclick="fakePdfDownload(event)">Baixar PDF</a>
-          </div>
+    <p style="color:var(--muted)">
+      Consistência semanal
+    </p>
 
-          <div class="resource">
-            <div class="resource-title">Wikipedia • Contabilidade</div>
-            <div class="resource-desc">Aprenda conceitos fundamentais de contabilidade.</div>
-            <a class="resource-btn" target="_blank" rel="noopener noreferrer" href="https://pt.wikipedia.org/wiki/Contabilidade">
-              Abrir conteúdo
-            </a>
-          </div>
-        </div>
-      </aside>
+    <div class="progress-bar">
+      <div class="progress"></div>
     </div>
-  </main>
+
+  </div>
+
+  <div class="small-card card">
+
+    <h3 style="margin-bottom:18px;">
+      🎥 Conteúdos recomendados
+    </h3>
+
+    <div id="coursesContainer"></div>
+
+  </div>
+
+</aside>
+      </div>
+</main>
 
 </div>
 
+<script src="js/cefis.js"></script>
 <script src="js/ai.js"></script>
-
-<script>
+  <script>
 /**
  * ==========================================
  * TODO PARA O FUTURO (AMBIENTE DE PRODUÇÃO)
