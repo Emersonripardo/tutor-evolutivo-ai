@@ -1,60 +1,49 @@
-const OPENAI_API_KEY =
-localStorage.getItem("openai_key")
-||
-prompt("Cole sua OpenAI API Key")
-
-localStorage.setItem(
-"openai_key",
-OPENAI_API_KEY
-)
-
 async function callOpenAI(messages){
 
-try{
+  try{
 
-const response = await fetch(
-"https://api.openai.com/v1/chat/completions",
-{
-method:"POST",
+    const response = await fetch(
+      "https://tutor-evolutivo-ai.onrender.com/chat",
+      {
 
-headers:{
-"Content-Type":"application/json",
-"Authorization":`Bearer ${OPENAI_API_KEY}`
-},
+        method:"POST",
 
-body:JSON.stringify({
+        headers:{
+          "Content-Type":"application/json"
+        },
 
-model:"gpt-4.1-mini",
+        body:JSON.stringify({
+          messages
+        })
 
-messages,
+      }
+    )
 
-temperature:0.8
+    if(!response.ok){
 
-})
-}
-)
+      throw new Error(
+        "Erro ao conectar"
+      )
 
-if(!response.ok){
+    }
 
-throw new Error(
-"Erro ao conectar com OpenAI"
-)
+    const data =
+    await response.json()
 
-}
+    return data
+      .choices[0]
+      .message
+      .content
 
-const data = await response.json()
+  }catch(error){
 
-return data.choices[0].message.content
+    console.error(error)
 
-}catch(error){
+    return `
+    Desculpe.
+    O tutor encontrou um erro.
+    `
 
-console.error(error)
-
-return `
-Desculpe.
-O tutor encontrou um erro.
-`
-
-}
+  }
 
 }
