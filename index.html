@@ -956,97 +956,59 @@ async function sendMessage(event) {
     </div>
   `;
   messages.appendChild(typingMessage);
-  messages.scrollTop = messages.scrollHeight;
+messages.scrollTop = messages.scrollHeight;
 
-  try {
-    let aiResponse = "";
+try {
 
-    // Tenta chamar a API se configurada via js/ai.js
-    if (typeof callOpenAI === "function") {
-      aiResponse = await callOpenAI([
-        {
-          role: "system",
-          content: `
-Você é um professor particular extremamente didático.
+  const aiResponse =
+  await callOpenAI(value)
 
-Seu papel é:
-- ensinar, simplificar assuntos difíceis,
-- usar analogias e exemplos reais,
-- adaptar explicações,
-- detectar dificuldades.
+  typingMessage.remove()
 
-O aluno aprende melhor com: ${learningStyle}. Adapte-se a isso.
-Nunca fale como suporte técnico. Fale como um professor humano inteligente.
-Use formatação Markdown simples (**negrito**, *itálico*) para destacar pontos chave.
-          `
-        },
-        { role: "user", content: value }
-      ]);
-      aiResponse = formatTextResponse(aiResponse);
-    } else {
-      // Fallback Simulador
-      await new Promise(r => setTimeout(r, 1200)); // Delay artificial
-      aiResponse = generateAIResponse(value);
-    }
+  const aiMessage =
+  document.createElement("div")
 
-    typingMessage.remove();
+  aiMessage.className =
+  "message ai fade-in"
 
-    const aiMessage = document.createElement("div");
-    aiMessage.className = "message ai fade-in";
-    aiMessage.innerHTML = aiResponse;
+  aiMessage.innerHTML =
+  aiResponse
 
-    messages.appendChild(aiMessage);
-  } catch(error) {
-    console.error("Erro na comunicação com IA:", error);
-    typingMessage.remove();
+  messages.appendChild(aiMessage)
 
-    const aiMessage = document.createElement("div");
-    aiMessage.className = "message ai fade-in";
-    aiMessage.innerHTML = `Ops! Tivemos um problema de conexão. Mostrando resposta simulada...<br><br>${generateAIResponse(value)}`;
-    messages.appendChild(aiMessage);
-  } finally {
-    messages.scrollTop = messages.scrollHeight;
-    input.disabled = false;
-    btn.disabled = false;
-    input.focus();
-  }
+} catch(error) {
+
+  console.error(
+    "Erro na comunicação com IA:",
+    error
+  );
+
+  typingMessage.remove();
+
+  const aiMessage =
+  document.createElement("div");
+
+  aiMessage.className =
+  "message ai fade-in";
+
+  aiMessage.innerHTML =
+  `Ops! Tivemos um problema de conexão.`;
+
+  messages.appendChild(aiMessage);
+
+} finally {
+
+  messages.scrollTop =
+  messages.scrollHeight;
+
+  input.disabled = false;
+
+  btn.disabled = false;
+
+   input.focus();
+
 }
 
-function generateAIResponse(question) {
-  const text = question.toLowerCase();
-
-  if (text.includes("icms") || text.includes("icms-st")) {
-    return `Ótima pergunta. O **ICMS** é um imposto estadual cobrado sobre a circulação de mercadorias.<br><br>
-      Como você aprende melhor com <b>${escapeHtml(learningStyle)}</b>, vamos usar um exemplo prático:<br><br>
-      Imagine que uma loja compra um produto por R$ 100 e vende por R$ 150.
-      O ICMS incide sobre essa operação. No **ICMS-ST** (Substituição Tributária), parte do imposto é antecipada logo na fábrica.`;
-  }
-
-  if (text.includes("contabilidade")) {
-    return `**Contabilidade** é a ciência que registra, organiza e interpreta as movimentações financeiras de uma empresa.<br><br>
-      Ela responde:<br>
-      • A empresa teve lucro?<br>
-      • Quanto ela deve pagar de impostos?<br>
-      • Quais são seus bens e dívidas?`;
-  }
-
-  if (text.includes("pdf")) {
-    return `Posso te ajudar a transformar um PDF em **resumo, mapa mental ou lista de exercícios**.<br><br>
-      *(Nesta versão demonstrativa, o envio de arquivos é simulado. Em uma versão final, você faria o upload do documento real)*.`;
-  }
-
-  if (text.match(/exercício|exercicio|teste|praticar/)) {
-    return `Claro. Vou criar um exercício rápido para você:<br><br>
-      **Pergunta:** Qual é a principal função da contabilidade dentro de uma empresa?<br><br>
-      A) Criar campanhas de marketing<br>
-      B) Registrar e interpretar informações financeiras<br>
-      C) Produzir mercadorias<br><br>
-      Responda com a letra que achar correta!`;
-  }
-
-  return `Entendi sua dúvida: *"${escapeHtml(question)}"*.<br><br>
-    Vou adaptar a explicação para focar em **${escapeHtml(learningStyle)}**.<br><br>
-    Vamos quebrar esse assunto em partes. Me diga qual detalhe você quer aprofundar primeiro.`;
 }
 
 // ------------------------------------------------------------------
