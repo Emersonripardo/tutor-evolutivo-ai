@@ -738,19 +738,7 @@ save()
 renderDashboard()
 
 }
-  const input = document.getElementById("chatInput")
-  const value = input.value.trim()
 
-  if(!value) return
-
-  state.chatHistory.push({ role:"user", content:value })
-  state.chatHistory.push({ role:"assistant", content:generateReply(value) })
-  save()
-
-  renderDashboard()
-}
-
-function generateReply(message){
   const user = state.userData
   const lower = message.toLowerCase()
 
