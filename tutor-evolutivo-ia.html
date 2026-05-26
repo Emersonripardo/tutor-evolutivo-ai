@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tutor Evolutivo IA</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #09090b;
+      --surface: rgba(255,255,255,0.04);
+      --border: rgba(255,255,255,0.08);
+      --border-hover: rgba(255,255,255,0.16);
+      --text: #fafaf9;
+      --muted: #71717a;
+      --accent: #6366f1;
+      --accent-glow: rgba(99,102,241,0.3);
+      --green: #22c55e;
+      --orange: #f97316;
+      --purple: #a855f7;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, .heading { font-family: 'Syne', sans-serif; }
+
+    .fade-in { animation: fadeUp .4s ease both; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .stagger-1 { animation-delay: .05s; }
+    .stagger-2 { animation-delay: .1s; }
+    .stagger-3 { animation-delay: .15s; }
+    .stagger-4 { animation-delay: .2s; }
+
+    .glass {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(16px);
+    }
+
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 14px; border-radius: 999px;
+      font-size: 13px; font-weight: 500;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+    }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 14px 28px; border-radius: 14px;
+      font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700;
+      cursor: pointer; border: none; transition: all .2s ease;
+    }
+    .btn:active { transform: scale(.97); }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #818cf8; box-shadow: 0 0 32px var(--accent-glow); }
+    .btn-green { background: var(--green); color: #fff; }
+    .btn-green:hover { background: #4ade80; }
+    .btn-orange { background: var(--orange); color: #fff; }
+    .btn-orange:hover { background: #fb923c; }
+    .btn-purple { background: var(--purple); color: #fff; }
+    .btn-purple:hover { background: #c084fc; }
+    .btn-ghost {
+      background: transparent; color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { border-color: var(--border-hover); color: var(--text); }
+    .btn-full { width: 100%; }
+
+    .card {
+      border-radius: 20px; padding: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+
+    input[type=text] {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 20px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    input[type=text]:focus { border-color: var(--accent); }
+    input[type=text]::placeholder { color: var(--muted); }
+
+    .progress-track {
+      height: 4px; border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%; border-radius: 999px;
+      background: var(--accent);
+      transition: width .5s ease;
+    }
+
+    .dot-loader { display: flex; gap: 6px; }
+    .dot-loader span {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--muted);
+      animation: dotBounce 1.2s infinite;
+    }
+    .dot-loader span:nth-child(2) { animation-delay: .2s; }
+    .dot-loader span:nth-child(3) { animation-delay: .4s; }
+    @keyframes dotBounce {
+      0%,80%,100% { transform: translateY(0); opacity:.4; }
+      40% { transform: translateY(-6px); opacity:1; }
+    }
+
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.7);
+      backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 100; padding: 24px;
+    }
+    .modal-box {
+      background: #18181b;
+      border: 1px solid var(--border-hover);
+      border-radius: 24px;
+      padding: 32px;
+      max-width: 480px; width: 100%;
+      animation: fadeUp .3s ease;
+    }
+
+    .xp-badge {
+      padding: 8px 16px; border-radius: 12px;
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px;
+      background: var(--surface); border: 1px solid var(--border);
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    .roadmap-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; border-radius: 14px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      margin-bottom: 10px;
+      font-size: 15px;
+    }
+    .roadmap-item .pct { color: var(--muted); font-size: 13px; }
+
+    .chat-bubble {
+      max-width: 85%;
+      padding: 12px 16px;
+      border-radius: 16px;
+      font-size: 14px; line-height: 1.6;
+      margin-bottom: 8px;
+    }
+    .chat-ai {
+      background: rgba(99,102,241,.12);
+      border: 1px solid rgba(99,102,241,.2);
+      border-bottom-left-radius: 4px;
+      align-self: flex-start;
+    }
+    .chat-user {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-bottom-right-radius: 4px;
+      align-self: flex-end;
+    }
+
+    #chat-messages {
+      display: flex; flex-direction: column;
+      gap: 4px; padding: 16px;
+      height: 280px; overflow-y: auto;
+    }
+    #chat-messages::-webkit-scrollbar { width: 4px; }
+    #chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .stat-label { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+    .stat-value { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 22px; }
+
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px; font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 16px; }
+    @media(max-width:700px) { .grid-3 { grid-template-columns: 1fr; } .grid-2 { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let currentQuestion = 0
+let userData = {}
+let xp = 120
+let streak = 3
+let planData = null
+let chatHistory = []
+
+const questions = [
+  { question: "O que você quer aprender?",         key: "goal",          placeholder: "Ex: Python, Marketing, Astronomia" },
+  { question: "Por que isso é importante para você?", key: "motivation",  placeholder: "Ex: Trocar de carreira" },
+  { question: "Quanto tempo você tem por dia?",    key: "time",          placeholder: "Ex: 10 minutos" },
+  { question: "Qual horário você rende mais?",     key: "bestTime",      placeholder: "Ex: Noite, manhã cedo..." },
+  { question: "Como você aprende melhor?",         key: "learningStyle", placeholder: "Ex: Vídeos, leitura, prática" },
+  { question: "Qual sua maior dificuldade?",       key: "difficulty",    placeholder: "Ex: Procrastinação, falta de foco" },
+]
+
+// ─── CLAUDE API ───────────────────────────────────────────────────────────────
+async function askClaude(systemPrompt, userMessage, historyArr = []) {
+  const messages = [
+    ...historyArr,
+    { role: "user", content: userMessage }
+  ]
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 1000,
+      system: systemPrompt,
+      messages
+    })
+  })
+  const data = await res.json()
+  return data.content.map(b => b.text || "").join("")
+}
+
+// ─── LANDING ─────────────────────────────────────────────────────────────────
+function renderLanding() {
+  document.getElementById("app").innerHTML = `
+    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 24px;">
+      <div style="max-width:680px;text-align:center;">
+
+        <div class="pill fade-in" style="margin-bottom:28px;">
+          <span style="width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;"></span>
+          Tutor Inteligente Adaptativo
+        </div>
+
+        <h1 class="heading fade-in stagger-1"
+            style="font-size:clamp(44px,8vw,76px);line-height:1.05;font-weight:800;letter-spacing:-1.5px;margin-bottom:20px;">
+          Aprenda com uma IA<br/>que entende você
+        </h1>
+
+        <p class="fade-in stagger-2"
+           style="color:var(--muted);font-size:18px;line-height:1.7;max-width:500px;margin:0 auto 40px;">
+          Um tutor inteligente que adapta seu plano de estudos, rotina,
+          formato de conteúdo — e impede você de desistir.
+        </p>
+
+        <div class="fade-in stagger-3">
+          <button class="btn btn-primary" style="font-size:18px;padding:18px 40px;"
+                  onclick="startOnboarding()">
+            Criar Meu Plano Inteligente →
+          </button>
+        </div>
+
+        <div class="fade-in stagger-4" style="display:flex;justify-content:center;gap:32px;margin-top:48px;">
+          ${["🔥 Streak diário","⭐ XP gamificado","🤖 IA adaptativa","📚 Plano personalizado"]
+            .map(f => `<span style="font-size:13px;color:var(--muted);">${f}</span>`).join("")}
+        </div>
+
+      </div>
+    </div>
+  `
+}
+
+// ─── ONBOARDING ───────────────────────────────────────────────────────────────
+function startOnboarding() { renderQuestion() }
+
+function renderQuestion() {
+  const q = questions[currentQuestion]
+  const pct = Math.round((currentQuestion / questions.length) * 100)
+
+  document.getElementById("app").innerHTML = `
+    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 24px;">
+      <div class="glass fade-in" style="border-radius:24px;padding:40px;width:100%;max-width:560px;">
+
+        <div style="margin-bottom:8px;">
+          <div class="progress-track">
+            <div class="progress-fill" style="width:${pct}%"></div>
+          </div>
+        </div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:32px;">
+          Etapa ${currentQuestion + 1} de ${questions.length}
+        </div>
+
+        <h2 class="heading" style="font-size:32px;font-weight:800;margin-bottom:28px;line-height:1.2;">
+          ${q.question}
+        </h2>
+
+        <input type="text" id="answer" placeholder="${q.placeholder}"
+               onkeydown="if(event.key==='Enter')nextQuestion()"/>
+
+        <button class="btn btn-primary btn-full" style="margin-top:20px;" onclick="nextQuestion()">
+          Continuar →
+        </button>
+
+        ${currentQuestion > 0 ? `
+          <button class="btn btn-ghost btn-full" style="margin-top:10px;" onclick="prevQuestion()">
+            ← Voltar
+          </button>` : ""}
+
+      </div>
+    </div>
+  `
+  setTimeout(() => document.getElementById("answer")?.focus(), 100)
+}
+
+function prevQuestion() {
+  currentQuestion--
+  renderQuestion()
+}
+
+function nextQuestion() {
+  const answer = document.getElementById("answer").value.trim()
+  if (!answer) {
+    document.getElementById("answer").style.borderColor = "#ef4444"
+    return
+  }
+  userData[questions[currentQuestion].key] = answer
+  currentQuestion++
+  if (currentQuestion >= questions.length) { showAnalysis(); return }
+  renderQuestion()
+}
+
+// ─── ANÁLISE ─────────────────────────────────────────────────────────────────
+function showAnalysis() {
+  const steps = [
+    "Identificando objetivo e perfil",
+    "Detectando lacunas de conhecimento",
+    "Adaptando à sua rotina",
+    "Escolhendo formato ideal",
+    "Gerando plano com IA Claude",
+  ]
+
+  document.getElementById("app").innerHTML = `
+    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 24px;">
+      <div class="glass fade-in" style="border-radius:24px;padding:40px;width:100%;max-width:520px;">
+        <h2 class="heading" style="font-size:28px;font-weight:800;margin-bottom:32px;">
+          Analisando seu perfil...
+        </h2>
+        <div id="analysis-steps" style="space-y:12px;"></div>
+      </div>
+    </div>
+  `
+
+  let i = 0
+  function addStep() {
+    if (i >= steps.length) return
+    const container = document.getElementById("analysis-steps")
+    const div = document.createElement("div")
+    div.style.cssText = "display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);animation:fadeUp .3s ease both;"
+    div.innerHTML = `
+      <span style="color:var(--green);font-size:18px;">✓</span>
+      <span style="font-size:15px;">${steps[i]}</span>
+    `
+    container.appendChild(div)
+    i++
+    if (i < steps.length) setTimeout(addStep, 600)
+  }
+  addStep()
+
+  generatePlanWithAI().then(plan => {
+    planData = plan
+    setTimeout(() => renderDashboard(), steps.length * 600 + 800)
+  })
+}
+
+async function generatePlanWithAI() {
+  const system = `Você é um tutor especialista em aprendizado personalizado.
+Responda APENAS em JSON válido, sem markdown ou texto adicional.
+Schema obrigatório:
+{
+  "summary": "string - 1 frase motivacional personalizada",
+  "roadmap": [
+    { "title": "string", "status": "done|active|locked", "percent": number }
+  ],
+  "lessonTip": "string - dica pedagógica personalizada",
+  "firstLesson": "string - conteúdo da primeira mini-aula (3-4 parágrafos)",
+  "antiProcrastinationTip": "string - estratégia específica para a dificuldade do usuário"
+}`
+
+  const userMsg = `Perfil do aluno:
+- Objetivo: ${userData.goal}
+- Motivação: ${userData.motivation}
+- Tempo disponível: ${userData.time} por dia
+- Melhor horário: ${userData.bestTime}
+- Estilo de aprendizado: ${userData.learningStyle}
+- Maior dificuldade: ${userData.difficulty}
+
+Gere um plano personalizado completo.`
+
+  try {
+    const raw = await askClaude(system, userMsg)
+    const clean = raw.replace(/```json|```/g, "").trim()
+    return JSON.parse(clean)
+  } catch(e) {
+    return {
+      summary: `Seu plano para aprender ${userData.goal} foi criado!`,
+      roadmap: [
+        { title: "Introdução", status: "done", percent: 100 },
+        { title: "Fundamentos", status: "active", percent: 45 },
+        { title: "Prática", status: "locked", percent: 0 },
+        { title: "Avançado", status: "locked", percent: 0 },
+      ],
+      lessonTip: `Como você aprende melhor com ${userData.learningStyle}, priorizamos esse formato.`,
+      firstLesson: `Bem-vindo ao seu plano de ${userData.goal}! Vamos começar com os conceitos fundamentais que você precisa dominar.`,
+      antiProcrastinationTip: `Para superar ${userData.difficulty}, use a técnica Pomodoro: ${userData.time} de foco total, depois uma pausa.`
+    }
+  }
+}
+
+// ─── DASHBOARD ────────────────────────────────────────────────────────────────
+function renderDashboard() {
+  const plan = planData || {}
+  const roadmap = plan.roadmap || []
+
+  const statusIcon = s => s === "done" ? "✅" : s === "active" ? "⏳" : "🔒"
+  const roadmapHTML = roadmap.map(r => `
+    <div class="roadmap-item">
+      <span>${statusIcon(r.status)} ${r.title}</span>
+      <span class="pct">${r.percent}%</span>
+    </div>
+  `).join("")
+
+  document.getElementById("app").innerHTML = `
+    <div style="max-width:1100px;margin:0 auto;padding:40px 24px;" class="fade-in">
+
+      <!-- HEADER -->
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:36px;">
+        <div>
+          <h1 class="heading" style="font-size:clamp(28px,5vw,44px);font-weight:800;letter-spacing:-0.5px;margin-bottom:6px;">
+            Seu Plano Inteligente
+          </h1>
+          <p style="color:var(--muted);font-size:15px;">${plan.summary || "Adaptado para sua rotina e objetivo"}</p>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <div class="xp-badge">🔥 ${streak} dias</div>
+          <div class="xp-badge">⭐ ${xp} XP</div>
+        </div>
+      </div>
+
+      <!-- STATS ROW -->
+      <div class="grid-3" style="margin-bottom:24px;">
+        <div class="card">
+          <div class="stat-label">Objetivo</div>
+          <div class="stat-value">${userData.goal}</div>
+        </div>
+        <div class="card">
+          <div class="stat-label">Melhor horário</div>
+          <div class="stat-value">${userData.bestTime}</div>
+        </div>
+        <div class="card">
+          <div class="stat-label">Tempo diário</div>
+          <div class="stat-value">${userData.time}</div>
+        </div>
+      </div>
+
+      <!-- MAIN GRID -->
+      <div class="grid-2" style="margin-bottom:24px;">
+
+        <!-- ROADMAP -->
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+            <div class="section-title" style="margin:0;">Roadmap</div>
+            <span style="background:rgba(99,102,241,.15);color:#818cf8;padding:4px 12px;border-radius:8px;font-size:13px;font-weight:700;">
+              ${roadmap.filter(r=>r.status==="done").length}/${roadmap.length} etapas
+            </span>
+          </div>
+          ${roadmapHTML}
+        </div>
+
+        <!-- AULA -->
+        <div class="card" style="display:flex;flex-direction:column;gap:16px;">
+          <div class="section-title" style="margin:0;">Aula de Hoje</div>
+
+          <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:14px;padding:16px;">
+            <div class="stat-label">Formato ideal para você</div>
+            <div style="font-weight:500;">${userData.learningStyle}</div>
+          </div>
+
+          <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:14px;padding:16px;flex:1;">
+            <div class="stat-label">Dica pedagógica da IA</div>
+            <div style="font-size:14px;line-height:1.6;color:#d4d4d8;">
+              ${plan.lessonTip || "Sessões curtas e objetivas para maximizar retenção."}
+            </div>
+          </div>
+
+          <button class="btn btn-green btn-full" onclick="showLesson()">
+            📖 Ver Mini-Aula de Hoje
+          </button>
+          <button class="btn" style="background:rgba(99,102,241,.2);color:#818cf8;width:100%;" onclick="completeLesson()">
+            ✅ Marcar Atividade como Concluída
+          </button>
+        </div>
+
+      </div>
+
+      <!-- TOOLS ROW -->
+      <div class="grid-2" style="margin-bottom:24px;">
+
+        <!-- CHAT -->
+        <div class="card" style="display:flex;flex-direction:column;">
+          <div class="section-title" style="margin-bottom:12px;">💬 Tutor IA</div>
+          <div id="chat-messages" style="flex:1;">
+            <div class="chat-bubble chat-ai">
+              Olá! Sou seu tutor de ${userData.goal}. Pode me perguntar qualquer coisa sobre o conteúdo! 🎓
+            </div>
+          </div>
+          <div style="padding:12px;border-top:1px solid var(--border);display:flex;gap:8px;">
+            <input type="text" id="chat-input" placeholder="Pergunte ao seu tutor..."
+                   onkeydown="if(event.key==='Enter')sendChatMessage()"
+                   style="flex:1;padding:10px 14px;font-size:14px;border-radius:10px;"/>
+            <button class="btn btn-primary" style="padding:10px 16px;border-radius:10px;"
+                    onclick="sendChatMessage()">→</button>
+          </div>
+        </div>
+
+        <!-- RECOVERY + 10MIN -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="card" style="flex:1;">
+            <div class="section-title" style="margin-bottom:8px;">🔄 Modo Recuperação</div>
+            <p style="color:var(--muted);font-size:14px;margin-bottom:16px;">
+              IA detectou queda de consistência. Vamos adaptar sua rotina.
+            </p>
+            <button class="btn btn-orange btn-full" onclick="recoveryFlow()">
+              Simular Recuperação
+            </button>
+          </div>
+          <div class="card" style="flex:1;">
+            <div class="section-title" style="margin-bottom:8px;">⚡ Modo 10 Minutos</div>
+            <p style="color:var(--muted);font-size:14px;margin-bottom:16px;">
+              IA resume e cria aprendizado ultra-rápido com quiz.
+            </p>
+            <button class="btn btn-purple btn-full" onclick="showTenMinuteMode()">
+              Ativar Modo 10 Min
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  `
+
+  chatHistory = [{ role: "assistant", content: `Olá! Sou seu tutor de ${userData.goal}. Pode me perguntar qualquer coisa sobre o conteúdo! 🎓` }]
+}
+
+// ─── CHAT ─────────────────────────────────────────────────────────────────────
+async function sendChatMessage() {
+  const input = document.getElementById("chat-input")
+  const msg = input.value.trim()
+  if (!msg) return
+  input.value = ""
+
+  appendChat("user", msg)
+
+  const typingId = appendChat("ai", null, true)
+
+  const system = `Você é um tutor especialista em ${userData.goal}.
+O aluno tem ${userData.time} por dia, aprende melhor com ${userData.learningStyle} e tem dificuldade com ${userData.difficulty}.
+Responda de forma clara, didática, concisa (max 3 parágrafos). Use exemplos práticos.`
+
+  const history = chatHistory.slice(-8).map(m => ({ role: m.role === "ai" ? "assistant" : "user", content: m.content }))
+  const reply = await askClaude(system, msg, history.slice(0,-1))
+
+  document.getElementById(typingId)?.remove()
+  appendChat("ai", reply)
+  chatHistory.push({ role: "user", content: msg }, { role: "ai", content: reply })
+}
+
+function appendChat(role, text, isTyping = false) {
+  const container = document.getElementById("chat-messages")
+  const div = document.createElement("div")
+  const id = "msg-" + Date.now()
+  div.id = id
+  div.className = `chat-bubble ${role === "ai" ? "chat-ai" : "chat-user"}`
+  if (isTyping) {
+    div.innerHTML = `<div class="dot-loader"><span></span><span></span><span></span></div>`
+  } else {
+    div.textContent = text
+  }
+  container.appendChild(div)
+  container.scrollTop = container.scrollHeight
+  return id
+}
+
+// ─── COMPLETE LESSON ─────────────────────────────────────────────────────────
+function completeLesson() {
+  xp += 50
+  streak++
+  showModal(`
+    <div style="text-align:center;">
+      <div style="font-size:48px;margin-bottom:16px;">🎉</div>
+      <h2 class="heading" style="font-size:24px;margin-bottom:12px;">Atividade concluída!</h2>
+      <p style="color:var(--muted);margin-bottom:20px;">
+        Você avançou mais um passo rumo ao seu objetivo de <strong style="color:var(--text);">${userData.goal}</strong>.
+      </p>
+      <div style="background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.2);border-radius:14px;padding:16px;margin-bottom:24px;">
+        <span style="font-family:Syne,sans-serif;font-size:28px;font-weight:800;color:#818cf8;">+50 XP</span>
+        <div style="color:var(--muted);font-size:13px;margin-top:4px;">Total: ${xp} XP · 🔥 ${streak} dias seguidos</div>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="closeModal();renderDashboard()">
+        Continuar →
+      </button>
+    </div>
+  `)
+}
+
+// ─── MINI AULA ────────────────────────────────────────────────────────────────
+async function showLesson() {
+  showModal(`
+    <div style="text-align:center;">
+      <div class="dot-loader" style="justify-content:center;margin-bottom:12px;"><span></span><span></span><span></span></div>
+      <p style="color:var(--muted);">Gerando sua mini-aula personalizada...</p>
+    </div>
+  `, false)
+
+  const lessonContent = planData?.firstLesson || await generateLesson()
+
+  showModal(`
+    <h2 class="heading" style="font-size:22px;margin-bottom:20px;">📚 Mini-Aula: ${userData.goal}</h2>
+    <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:20px;max-height:300px;overflow-y:auto;line-height:1.7;font-size:14px;color:#d4d4d8;">
+      ${lessonContent.split('\n').filter(l=>l.trim()).map(l=>`<p style="margin-bottom:12px;">${l}</p>`).join("")}
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="closeModal()">Fechar</button>
+      <button class="btn btn-green" style="flex:1;" onclick="closeModal();completeLesson()">✅ Concluir</button>
+    </div>
+  `)
+}
+
+async function generateLesson() {
+  const system = `Você é um tutor de ${userData.goal}. Escreva uma mini-aula introdutória personalizada.
+Adapte para alguém com ${userData.time} por dia que aprende melhor por ${userData.learningStyle}.
+Use linguagem clara, exemplos práticos. 3-4 parágrafos.`
+  return askClaude(system, `Crie a primeira mini-aula sobre ${userData.goal} para este aluno.`)
+}
+
+// ─── RECOVERY ────────────────────────────────────────────────────────────────
+function recoveryFlow() {
+  showModal(`
+    <h2 class="heading" style="font-size:22px;margin-bottom:20px;">🔄 Modo Recuperação</h2>
+    <p style="color:var(--muted);margin-bottom:20px;">O que dificultou sua continuidade?</p>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      ${[
+        ["1","⏱ Falta de tempo"],
+        ["2","🤯 Conteúdo muito difícil"],
+        ["3","😔 Perdi a motivação"],
+        ["4","📚 Muito conteúdo de uma vez"],
+      ].map(([v,l]) => `
+        <button class="btn btn-ghost btn-full" style="justify-content:flex-start;padding:14px 18px;font-size:15px;"
+                onclick="handleRecovery('${v}')">
+          ${l}
+        </button>
+      `).join("")}
+    </div>
+  `)
+}
+
+async function handleRecovery(reason) {
+  showModal(`
+    <div style="text-align:center;">
+      <div class="dot-loader" style="justify-content:center;margin-bottom:12px;"><span></span><span></span><span></span></div>
+      <p style="color:var(--muted);">IA adaptando seu plano...</p>
+    </div>
+  `, false)
+
+  const reasons = { "1":"falta de tempo", "2":"conteúdo difícil", "3":"perda de motivação", "4":"excesso de conteúdo" }
+  const system = `Você é um coach de aprendizado empático e estratégico.
+O aluno quer aprender ${userData.goal} mas está com dificuldade por: ${reasons[reason]}.
+Responda com: 1 frase de empatia, 2-3 estratégias concretas e adaptadas, 1 ação para fazer agora.
+Seja direto, prático e motivador. Max 150 palavras.`
+
+  const reply = await askClaude(system, `Como me ajudar a retomar considerando meu perfil: ${userData.time}/dia, estilo ${userData.learningStyle}?`)
+
+  showModal(`
+    <h2 class="heading" style="font-size:22px;margin-bottom:20px;">💡 Plano de Recuperação</h2>
+    <div style="background:rgba(249,115,22,.08);border:1px solid rgba(249,115,22,.2);border-radius:14px;padding:20px;margin-bottom:24px;line-height:1.7;font-size:14px;color:#d4d4d8;">
+      ${reply.split('\n').filter(l=>l.trim()).map(l=>`<p style="margin-bottom:10px;">${l}</p>`).join("")}
+    </div>
+    <button class="btn btn-orange btn-full" onclick="closeModal()">Vou retomar agora! 💪</button>
+  `)
+}
+
+// ─── MODO 10 MIN ─────────────────────────────────────────────────────────────
+async function showTenMinuteMode() {
+  showModal(`
+    <div style="text-align:center;">
+      <div class="dot-loader" style="justify-content:center;margin-bottom:12px;"><span></span><span></span><span></span></div>
+      <p style="color:var(--muted);">Criando sessão ultra-rápida...</p>
+    </div>
+  `, false)
+
+  const system = `Você é um tutor especialista em ${userData.goal}.
+Crie uma sessão de aprendizado de 10 minutos em JSON válido, sem markdown:
+{
+  "summary": "string - conceito principal em 2 frases",
+  "keyPoints": ["string", "string", "string"],
+  "quiz": [
+    { "q": "string - pergunta", "a": "string - resposta curta" }
+  ],
+  "action": "string - 1 exercício prático para fazer em 5 min"
+}`
+
+  try {
+    const raw = await askClaude(system, `Crie sessão de 10 minutos sobre ${userData.goal} para nível iniciante.`)
+    const clean = raw.replace(/```json|```/g, "").trim()
+    const data = JSON.parse(clean)
+
+    showModal(`
+      <div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+          <span style="background:rgba(168,85,247,.15);color:#c084fc;padding:4px 12px;border-radius:8px;font-size:13px;font-weight:700;">⚡ 10 MINUTOS</span>
+          <h2 class="heading" style="font-size:20px;">Sessão Rápida</h2>
+        </div>
+
+        <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px;">
+          <div class="stat-label">Conceito de hoje</div>
+          <p style="font-size:14px;line-height:1.6;">${data.summary}</p>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <div class="stat-label" style="margin-bottom:8px;">Pontos-chave</div>
+          ${data.keyPoints.map(p=>`
+            <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:6px;font-size:14px;">
+              <span style="color:var(--accent);margin-top:2px;">▸</span> ${p}
+            </div>
+          `).join("")}
+        </div>
+
+        <div style="background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.15);border-radius:14px;padding:16px;margin-bottom:14px;">
+          <div class="stat-label">Quiz rápido</div>
+          ${data.quiz.map((q,i)=>`
+            <div style="margin-bottom:8px;">
+              <div style="font-size:14px;font-weight:500;margin-bottom:4px;">Q${i+1}: ${q.q}</div>
+              <details style="font-size:13px;color:var(--muted);">
+                <summary style="cursor:pointer;color:var(--accent);">Ver resposta</summary>
+                <div style="margin-top:4px;padding:8px;background:rgba(255,255,255,.04);border-radius:8px;">${q.a}</div>
+              </details>
+            </div>
+          `).join("")}
+        </div>
+
+        <div style="font-size:14px;color:var(--muted);margin-bottom:20px;">
+          🎯 <strong style="color:var(--text);">Ação prática:</strong> ${data.action}
+        </div>
+
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-ghost" style="flex:1;" onclick="closeModal()">Fechar</button>
+          <button class="btn btn-purple" style="flex:1;" onclick="closeModal();completeLesson()">✅ Concluído!</button>
+        </div>
+      </div>
+    `)
+  } catch(e) {
+    showModal(`
+      <h2 class="heading" style="font-size:22px;margin-bottom:16px;">⚡ Modo 10 Minutos</h2>
+      <p style="color:var(--muted);margin-bottom:20px;">Sessão rápida de ${userData.goal}:</p>
+      <ul style="list-style:none;padding:0;margin-bottom:24px;">
+        ${["Resumo do conteúdo","Mini-aula objetiva","Quiz rápido","Exercício prático"].map(i=>`<li style="padding:10px 0;border-bottom:1px solid var(--border);font-size:14px;">✅ ${i}</li>`).join("")}
+      </ul>
+      <button class="btn btn-purple btn-full" onclick="closeModal()">Começar!</button>
+    `)
+  }
+}
+
+// ─── MODAL ────────────────────────────────────────────────────────────────────
+function showModal(html, closeable = true) {
+  const existing = document.getElementById("modal-overlay")
+  if (existing) existing.remove()
+
+  const overlay = document.createElement("div")
+  overlay.id = "modal-overlay"
+  overlay.className = "modal-overlay"
+  if (closeable) overlay.onclick = e => { if (e.target === overlay) closeModal() }
+
+  const box = document.createElement("div")
+  box.className = "modal-box"
+  box.innerHTML = html
+  overlay.appendChild(box)
+  document.body.appendChild(overlay)
+}
+
+function closeModal() {
+  document.getElementById("modal-overlay")?.remove()
+}
+
+// ─── START ────────────────────────────────────────────────────────────────────
+renderLanding()
+</script>
+</body>
+</html>
