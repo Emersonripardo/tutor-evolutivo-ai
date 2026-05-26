@@ -681,7 +681,63 @@ function renderChatHistory(){
   `).join("")
 }
 
-function sendMessage(){
+async function sendMessage(){
+
+const input =
+document.getElementById("chatInput")
+
+const value =
+input.value.trim()
+
+if(!value)return
+
+state.chatHistory.push({
+
+role:"user",
+content:value
+
+})
+
+renderDashboard()
+
+const response =
+await callOpenAI([
+
+{
+role:"system",
+
+content:`
+
+Você é um tutor emocional adaptativo.
+
+Seu objetivo é:
+- reduzir abandono,
+- detectar procrastinação,
+- adaptar dificuldade,
+- simplificar conteúdos difíceis,
+- entender emoções,
+- criar pequenas vitórias rápidas,
+- usar linguagem humana e motivadora.
+
+`
+},
+
+...state.chatHistory
+
+])
+
+state.chatHistory.push({
+
+role:"assistant",
+content:response
+
+})
+
+save()
+
+renderDashboard()
+
+}
   const input = document.getElementById("chatInput")
   const value = input.value.trim()
 
@@ -867,5 +923,8 @@ document.addEventListener("keydown", event => {
 if(state.plan) renderDashboard()
 else renderLanding()
 </script>
+
+<script src="js/ai.js"></script>
+
 </body>
 </html>
