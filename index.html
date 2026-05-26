@@ -1,497 +1,575 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
-<title>Professor AI • Tutor Inteligente</title>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-<style>
-:root{
-  --bg:#0b1020;
-  --card:#131a2e;
-  --card2:#1b2340;
-  --primary:#7c5cff;
-  --primary2:#5ce1e6;
-  --text:#ffffff;
-  --muted:#9ca3af;
-  --success:#2ecc71;
-  --danger:#ff5c7a;
-  --border:rgba(255,255,255,.08);
-}
-
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:'Inter',sans-serif;
-}
-
-body{
-  background:linear-gradient(180deg,#08101f,#0f172a);
-  color:var(--text);
-  min-height:100vh;
-  overflow-x:hidden;
-}
-
-button{
-  cursor:pointer;
-  border:none;
-}
-
-.hidden{
-  display:none !important;
-}
-
-.fade-in {
-  animation: fadeIn 0.4s ease forwards;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.container{
-  max-width:1400px;
-  margin:auto;
-  padding:24px;
-}
-
-.glow{
-  position:fixed;
-  width:500px;
-  height:500px;
-  border-radius:50%;
-  background:radial-gradient(circle,var(--primary),transparent);
-  filter:blur(140px);
-  opacity:.18;
-  z-index:-1;
-}
-
-.glow2{ right:-150px; top:-100px; }
-.glow1{ left:-150px; bottom:-100px; background:radial-gradient(circle,var(--primary2),transparent); }
-
-.card{
-  background:rgba(19,26,46,.82);
-  border:1px solid var(--border);
-  backdrop-filter:blur(14px);
-  border-radius:28px;
-}
-
-.login-screen{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  min-height:100vh;
-  padding:20px;
-}
-
-.login-box{
-  width:100%;
-  max-width:500px;
-  padding:40px;
-}
-
-.logo{
-  display:flex;
-  align-items:center;
-  gap:14px;
-  margin-bottom:24px;
-}
-
-.logo-icon{
-  width:56px;
-  height:56px;
-  border-radius:18px;
-  background:linear-gradient(135deg,var(--primary),var(--primary2));
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:24px;
-  font-weight:800;
-}
-
-.title{
-  font-size:42px;
-  font-weight:800;
-  line-height:1.1;
-  margin-bottom:16px;
-}
-
-.subtitle{
-  color:var(--muted);
-  line-height:1.8;
-  margin-bottom:32px;
-}
-
-.input{
-  width:100%;
-  padding:18px;
-  border-radius:18px;
-  background:rgba(255,255,255,.04);
-  border:1px solid var(--border);
-  color:white;
-  font-size:16px;
-  margin-bottom:16px;
-  outline:none;
-  transition: border-color 0.3s;
-}
-
-.input:focus{
-  border-color:var(--primary);
-}
-
-.btn{
-  width:100%;
-  padding:18px;
-  border-radius:18px;
-  background:linear-gradient(135deg,var(--primary),var(--primary2));
-  color:white;
-  font-weight:700;
-  font-size:16px;
-  transition:.3s;
-}
-
-.btn:hover{
-  transform:translateY(-2px);
-  box-shadow: 0 8px 20px rgba(124,92,255,.3);
-}
-
-.dashboard{
-  display:grid;
-  grid-template-columns:320px 1fr;
-  gap:24px;
-  min-height:100vh;
-}
-
-.sidebar{
-  padding:24px;
-  position:sticky;
-  top:0;
-  height:100vh;
-}
-
-.menu-item{
-  padding:16px;
-  border-radius:16px;
-  margin-bottom:10px;
-  display:flex;
-  align-items:center;
-  gap:12px;
-  transition:.3s;
-  color:var(--muted);
-  cursor:pointer;
-}
-
-.menu-item:hover,
-.menu-item.active {
-  background:rgba(255,255,255,.05);
-  color:white;
-}
-
-.main{
-  padding:24px;
-}
-
-.hero{
-  padding:36px;
-  margin-bottom:24px;
-  position:relative;
-  overflow:hidden;
-}
-
-.hero h1{
-  font-size:54px;
-  line-height:1.1;
-  margin-bottom:18px;
-  max-width:700px;
-}
-
-.hero p{
-  color:var(--muted);
-  line-height:1.8;
-  max-width:700px;
-  font-size:18px;
-}
-
-.hero-buttons{
-  display:flex;
-  gap:16px;
-  margin-top:28px;
-  flex-wrap:wrap;
-}
-
-.hero-btn{
-  padding:16px 24px;
-  border-radius:16px;
-  font-weight:700;
-}
-
-.primary-btn{
-  background:linear-gradient(135deg,var(--primary),var(--primary2));
-  color:white;
-  transition: transform 0.2s;
-}
-
-.primary-btn:hover{
-  transform:translateY(-2px);
-}
-
-.secondary-btn{
-  background:rgba(255,255,255,.05);
-  border:1px solid var(--border);
-  color:white;
-  transition: background 0.2s;
-}
-
-.secondary-btn:hover{
-  background:rgba(255,255,255,.1);
-}
-
-.section-title{
-  font-size:28px;
-  font-weight:800;
-  margin-bottom:20px;
-}
-
-.chat-area{
-  display:grid;
-  grid-template-columns:1fr 350px;
-  gap:24px;
-}
-
-.chat-box{
-  padding:24px;
-  height:700px;
-  display:flex;
-  flex-direction:column;
-}
-
-.messages{
-  flex:1;
-  overflow-y:auto;
-  padding-right:10px;
-}
-
-.messages::-webkit-scrollbar{
-  width:6px;
-}
-
-.messages::-webkit-scrollbar-thumb{
-  background:rgba(255,255,255,0.1);
-  border-radius:10px;
-}
-
-.message{
-  margin-bottom:18px;
-  max-width:80%;
-  padding:18px;
-  border-radius:20px;
-  line-height:1.7;
-}
-
-.ai{
-  background:rgba(124,92,255,.18);
-  border:1px solid rgba(124,92,255,.4);
-  border-bottom-left-radius:4px;
-}
-
-.user{
-  background:rgba(255,255,255,.06);
-  border:1px solid var(--border);
-  margin-left:auto;
-  border-bottom-right-radius:4px;
-}
-
-.typing-indicator{
-  display:flex;
-  gap:4px;
-  padding:8px 4px;
-}
-
-.typing-indicator span{
-  width:8px;
-  height:8px;
-  background-color:var(--primary2);
-  border-radius:50%;
-  animation: typing 1s infinite ease-in-out;
-}
-
-.typing-indicator span:nth-child(1){ animation-delay:0s; }
-.typing-indicator span:nth-child(2){ animation-delay:0.2s; }
-.typing-indicator span:nth-child(3){ animation-delay:0.4s; }
-
-@keyframes typing {
-  0%, 100% { transform:translateY(0); opacity:0.5; }
-  50% { transform:translateY(-5px); opacity:1; }
-}
-
-.chat-input-wrapper{
-  display:flex;
-  gap:12px;
-  margin-top:20px;
-}
-
-.send-btn{
-  padding:0 24px;
-  border-radius:16px;
-  background:linear-gradient(135deg,var(--primary),var(--primary2));
-  color:white;
-  font-weight:700;
-  transition: transform 0.2s;
-}
-
-.send-btn:hover{
-  transform:translateY(-2px);
-}
-
-.side-panel{
-  display:flex;
-  flex-direction:column;
-  gap:20px;
-}
-
-.small-card{
-  padding:24px;
-}
-
-.resource{
-  padding:16px;
-  border-radius:18px;
-  background:rgba(255,255,255,.04);
-  margin-bottom:14px;
-  border:1px solid rgba(255,255,255,.05);
-}
-
-.resource-title{
-  font-weight:700;
-  margin-bottom:8px;
-}
-
-.resource-desc{
-  font-size:14px;
-  color:var(--muted);
-  line-height:1.6;
-  margin-bottom:12px;
-}
-
-.resource-btn{
-  padding:10px 14px;
-  border-radius:12px;
-  background:rgba(124,92,255,.18);
-  color:white;
-  font-weight:600;
-  display:inline-block;
-  text-decoration:none;
-  transition: background 0.3s;
-}
-
-.resource-btn:hover{
-  background:rgba(124,92,255,.3);
-}
-
-.progress-bar{
-  width:100%;
-  height:12px;
-  background:rgba(255,255,255,.05);
-  border-radius:999px;
-  overflow:hidden;
-  margin-top:12px;
-}
-
-.progress{
-  height:100%;
-  width:68%;
-  background:linear-gradient(90deg,var(--primary),var(--primary2));
-}
-
-.onboarding{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.75);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-  z-index:999;
-}
-
-.onboarding-box{
-  width:100%;
-  max-width:650px;
-  padding:40px;
-}
-
-.option{
-  padding:16px;
-  border-radius:16px;
-  background:rgba(255,255,255,.04);
-  border:1px solid transparent;
-  margin-bottom:12px;
-  cursor:pointer;
-  transition:.3s;
-  font-weight:500;
-}
-
-.option:hover{
-  border-color:var(--primary);
-  background:rgba(124,92,255,.1);
-}
-
-@media(max-width:1100px){
-  .dashboard{
-    grid-template-columns:1fr;
-  }
-
-  .sidebar{
-    position:relative;
-    height:auto;
-  }
-
-  .chat-area{
-    grid-template-columns:1fr;
-  }
-
-  .hero h1{
-    font-size:42px;
-  }
-}
-
-@media(max-width:600px){
-  .login-box,
-  .onboarding-box,
-  .hero,
-  .chat-box,
-  .small-card{
-    padding:24px;
-    border-radius:22px;
-  }
-
-  .title{
-    font-size:34px;
-  }
-
-  .hero h1{
-    font-size:36px;
-  }
-
-  .chat-input-wrapper{
-    flex-direction:column;
-  }
-
-  .send-btn{
-    padding:16px;
-  }
-
-  .message{
-    max-width:100%;
-  }
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Professor AI - Seu Tutor Inteligente" />
+
+  <title>Professor AI • Tutor Inteligente</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: #131a2e;
+      --card2: #1b2340;
+      --primary: #7c5cff;
+      --primary-hover: #6b4de0;
+      --primary2: #5ce1e6;
+      --text: #ffffff;
+      --muted: #9ca3af;
+      --success: #2ecc71;
+      --danger: #ff5c7a;
+      --danger-bg: rgba(255, 92, 122, 0.12);
+      --danger-border: rgba(255, 92, 122, 0.35);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(255, 255, 255, 0.15);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(180deg, #08101f, #0f172a);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      font-family: inherit;
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .fade-in {
+      animation: fadeIn 0.4s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Background Glow Effects */
+    .glow {
+      position: fixed;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--primary), transparent);
+      filter: blur(140px);
+      opacity: 0.18;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .glow2 { right: -150px; top: -100px; }
+    .glow1 { left: -150px; bottom: -100px; background: radial-gradient(circle, var(--primary2), transparent); }
+
+    /* Cards & Containers */
+    .card {
+      background: rgba(19, 26, 46, 0.82);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-radius: 28px;
+    }
+
+    /* Auth Screens */
+    .login-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .login-box {
+      width: 100%;
+      max-width: 500px;
+      padding: 40px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .logo-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, var(--primary), var(--primary2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    .title {
+      font-size: 42px;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      line-height: 1.8;
+      margin-bottom: 32px;
+    }
+
+    /* Forms */
+    .input {
+      width: 100%;
+      padding: 18px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      color: white;
+      font-size: 16px;
+      margin-bottom: 16px;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    .input:focus {
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 18px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, var(--primary), var(--primary2));
+      color: white;
+      font-weight: 700;
+      font-size: 16px;
+      transition: 0.3s;
+    }
+
+    .btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(124, 92, 255, 0.3);
+    }
+
+    .link-btn {
+      margin-top: 18px;
+      background: transparent;
+      color: var(--primary2);
+      font-size: 15px;
+      font-weight: 700;
+      width: 100%;
+      transition: color 0.3s;
+    }
+
+    .link-btn:hover {
+      color: #fff;
+    }
+
+    .alert {
+      display: none;
+      padding: 14px;
+      margin-bottom: 16px;
+      border-radius: 14px;
+      background: var(--danger-bg);
+      border: 1px solid var(--danger-border);
+      color: #ffd4dc;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    /* Dashboard Layout */
+    .dashboard {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 24px;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      padding: 24px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .menu-item {
+      padding: 16px;
+      border-radius: 16px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: 0.3s;
+      color: var(--muted);
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .menu-item:hover,
+    .menu-item.active {
+      background: rgba(255, 255, 255, 0.05);
+      color: white;
+    }
+
+    .logout-btn {
+      width: 100%;
+      margin-top: 20px;
+      padding: 14px;
+      border-radius: 14px;
+      background: var(--danger-bg);
+      color: #ffd4dc;
+      font-weight: 700;
+      transition: background 0.3s;
+    }
+
+    .logout-btn:hover {
+      background: rgba(255, 92, 122, 0.2);
+    }
+
+    .main {
+      padding: 24px;
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 36px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero h1 {
+      font-size: 54px;
+      line-height: 1.1;
+      margin-bottom: 18px;
+      max-width: 700px;
+    }
+
+    .hero p {
+      color: var(--muted);
+      line-height: 1.8;
+      max-width: 700px;
+      font-size: 18px;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 16px;
+      margin-top: 28px;
+      flex-wrap: wrap;
+    }
+
+    .hero-btn {
+      padding: 16px 24px;
+      border-radius: 16px;
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    .primary-btn {
+      background: linear-gradient(135deg, var(--primary), var(--primary2));
+      color: white;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .primary-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(124, 92, 255, 0.4);
+    }
+
+    .secondary-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: white;
+      transition: background 0.2s;
+    }
+
+    .secondary-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .section-title {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 20px;
+    }
+
+    /* Chat UI */
+    .chat-area {
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 24px;
+    }
+
+    .chat-box {
+      padding: 24px;
+      height: 700px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 10px;
+      scroll-behavior: smooth;
+    }
+
+    .messages::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .messages::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+
+    .message {
+      margin-bottom: 18px;
+      max-width: 80%;
+      padding: 18px;
+      border-radius: 20px;
+      line-height: 1.7;
+      word-wrap: break-word;
+    }
+
+    .message b, .message strong {
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .message i, .message em {
+      font-style: italic;
+      color: rgba(255,255,255,0.85);
+    }
+
+    .ai {
+      background: rgba(124, 92, 255, 0.18);
+      border: 1px solid rgba(124, 92, 255, 0.4);
+      border-bottom-left-radius: 4px;
+    }
+
+    .user {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      margin-left: auto;
+      border-bottom-right-radius: 4px;
+    }
+
+    .typing-indicator {
+      display: flex;
+      gap: 4px;
+      padding: 8px 4px;
+    }
+
+    .typing-indicator span {
+      width: 8px;
+      height: 8px;
+      background-color: var(--primary2);
+      border-radius: 50%;
+      animation: typing 1s infinite ease-in-out;
+    }
+
+    .typing-indicator span:nth-child(1) { animation-delay: 0s; }
+    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typing {
+      0%, 100% { transform: translateY(0); opacity: 0.5; }
+      50% { transform: translateY(-5px); opacity: 1; }
+    }
+
+    .chat-input-wrapper {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .send-btn {
+      padding: 0 24px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--primary), var(--primary2));
+      color: white;
+      font-weight: 700;
+      transition: transform 0.2s;
+    }
+
+    .send-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+    }
+
+    /* Side Panel */
+    .side-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .small-card {
+      padding: 24px;
+    }
+
+    .resource {
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.04);
+      margin-bottom: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: border-color 0.3s;
+    }
+
+    .resource:hover {
+      border-color: var(--border-hover);
+    }
+
+    .resource-title {
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .resource-desc {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .resource-btn {
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: rgba(124, 92, 255, 0.18);
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      display: inline-block;
+      text-decoration: none;
+      transition: background 0.3s;
+    }
+
+    .resource-btn:hover {
+      background: rgba(124, 92, 255, 0.3);
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 12px;
+    }
+
+    .progress {
+      height: 100%;
+      width: 68%;
+      background: linear-gradient(90deg, var(--primary), var(--primary2));
+      border-radius: 999px;
+    }
+
+    /* Onboarding */
+    .onboarding {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(5px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 999;
+    }
+
+    .onboarding-box {
+      width: 100%;
+      max-width: 650px;
+      padding: 40px;
+    }
+
+    .option {
+      padding: 16px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid transparent;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: 0.3s;
+      font-weight: 500;
+    }
+
+    .option:hover {
+      border-color: var(--primary);
+      background: rgba(124, 92, 255, 0.1);
+      transform: translateX(4px);
+    }
+
+    /* Responsividade */
+    @media(max-width: 1100px) {
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        position: relative;
+        height: auto;
+      }
+      .chat-area {
+        grid-template-columns: 1fr;
+      }
+      .hero h1 {
+        font-size: 42px;
+      }
+    }
+
+    @media(max-width: 600px) {
+      .login-box,
+      .onboarding-box,
+      .hero,
+      .chat-box,
+      .small-card {
+        padding: 24px;
+        border-radius: 22px;
+      }
+      .title {
+        font-size: 34px;
+      }
+      .hero h1 {
+        font-size: 36px;
+      }
+      .chat-input-wrapper {
+        flex-direction: column;
+      }
+      .send-btn {
+        padding: 16px;
+      }
+      .message {
+        max-width: 100%;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -509,15 +587,41 @@ button{
       </div>
     </div>
 
-    <h1 class="title">Aprenda do jeito certo para VOCÊ.</h1>
-    <p class="subtitle">
-      A IA entende seu ritmo, sua dificuldade e sua forma de aprender para criar a melhor jornada possível.
-    </p>
+    <h1 class="title">Entre na sua conta.</h1>
+    <p class="subtitle">Acesse sua jornada personalizada de estudos com IA.</p>
 
-    <input type="email" class="input" placeholder="Seu email" id="email" required>
-    <input type="password" class="input" placeholder="Sua senha" required>
+    <div id="loginAlert" class="alert" role="alert"></div>
 
-    <button type="submit" class="btn">Entrar na plataforma</button>
+    <input type="email" class="input" placeholder="Seu email" id="loginEmail" required autocomplete="email">
+    <input type="password" class="input" placeholder="Sua senha" id="loginPassword" required autocomplete="current-password">
+
+    <button type="submit" class="btn" id="loginBtn">Entrar na plataforma</button>
+    <button type="button" class="link-btn" onclick="showRegister()">Ainda não tenho conta. Criar conta</button>
+  </form>
+</div>
+
+<div id="registerScreen" class="login-screen hidden fade-in">
+  <form class="login-box card" onsubmit="register(event)">
+    <div class="logo">
+      <div class="logo-icon">🧠</div>
+      <div>
+        <h2>Professor AI</h2>
+        <p style="color:var(--muted)">Crie seu acesso</p>
+      </div>
+    </div>
+
+    <h1 class="title">Crie sua conta.</h1>
+    <p class="subtitle">Seu perfil será salvo temporariamente neste navegador.</p>
+
+    <div id="registerAlert" class="alert" role="alert"></div>
+
+    <input type="text" class="input" placeholder="Seu nome" id="registerName" required autocomplete="name">
+    <input type="email" class="input" placeholder="Seu email" id="registerEmail" required autocomplete="email">
+    <input type="password" class="input" placeholder="Crie uma senha" id="registerPassword" required autocomplete="new-password">
+    <input type="password" class="input" placeholder="Confirme sua senha" id="registerConfirmPassword" required autocomplete="new-password">
+
+    <button type="submit" class="btn" id="registerBtn">Criar conta</button>
+    <button type="button" class="link-btn" onclick="showLogin()">Já tenho conta. Fazer login</button>
   </form>
 </div>
 
@@ -544,13 +648,17 @@ button{
       </div>
     </div>
 
-    <div class="menu-item active">🏠 Início</div>
-    <div class="menu-item">🎯 Minha Jornada</div>
-    <div class="menu-item">📚 Conteúdos</div>
-    <div class="menu-item">🎥 Vídeos</div>
-    <div class="menu-item">🧠 Exercícios</div>
-    <div class="menu-item">📄 PDFs Inteligentes</div>
-    <div class="menu-item">⚙️ Configurações</div>
+    <nav>
+      <div class="menu-item active">🏠 Início</div>
+      <div class="menu-item">🎯 Minha Jornada</div>
+      <div class="menu-item">📚 Conteúdos</div>
+      <div class="menu-item">🎥 Vídeos</div>
+      <div class="menu-item">🧠 Exercícios</div>
+      <div class="menu-item">📄 PDFs Inteligentes</div>
+      <div class="menu-item">⚙️ Configurações</div>
+    </nav>
+
+    <button class="logout-btn" onclick="logout()">Sair da conta</button>
   </aside>
 
   <main class="main">
@@ -569,20 +677,21 @@ button{
 
     <div class="chat-area">
       <section class="chat-box card">
-        <h2 class="section-title">Professor AI</h2>
+        <h2 class="section-title">Sala de Aula</h2>
 
-        <div class="messages" id="messages"></div>
+        <div class="messages" id="messages" aria-live="polite"></div>
 
         <form class="chat-input-wrapper" onsubmit="sendMessage(event)">
           <input
             type="text"
             id="chatInput"
             class="input"
-            placeholder="Pergunte qualquer coisa..."
+            placeholder="Pergunte qualquer coisa (ex: O que é ICMS?)..."
             style="margin:0;"
             autocomplete="off"
+            required
           >
-          <button type="submit" class="send-btn">Enviar</button>
+          <button type="submit" class="send-btn" id="sendBtn">Enviar</button>
         </form>
       </section>
 
@@ -590,7 +699,7 @@ button{
         <div class="small-card card">
           <h3 style="margin-bottom:16px;">📈 Sua evolução</h3>
           <p style="color:var(--muted)">Consistência semanal</p>
-          <div class="progress-bar">
+          <div class="progress-bar" role="progressbar" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100">
             <div class="progress"></div>
           </div>
         </div>
@@ -600,28 +709,22 @@ button{
 
           <div class="resource">
             <div class="resource-title">Como funciona ICMS-ST na prática</div>
-            <div class="resource-desc">
-              Vídeo prático explicando substituição tributária de forma simples.
-            </div>
-            <a class="resource-btn" target="_blank" href="https://www.youtube.com/results?search_query=ICMS+ST">
+            <div class="resource-desc">Vídeo prático explicando substituição tributária de forma simples.</div>
+            <a class="resource-btn" target="_blank" rel="noopener noreferrer" href="https://www.youtube.com/results?search_query=ICMS+ST">
               Assistir vídeo
             </a>
           </div>
 
           <div class="resource">
             <div class="resource-title">Resumo Inteligente PDF</div>
-            <div class="resource-desc">
-              Resumo criado automaticamente pela IA para revisão rápida.
-            </div>
+            <div class="resource-desc">Resumo criado automaticamente pela IA para revisão rápida.</div>
             <a class="resource-btn" href="#" onclick="fakePdfDownload(event)">Baixar PDF</a>
           </div>
 
           <div class="resource">
             <div class="resource-title">Wikipedia • Contabilidade</div>
-            <div class="resource-desc">
-              Aprenda conceitos fundamentais de contabilidade.
-            </div>
-            <a class="resource-btn" target="_blank" href="https://pt.wikipedia.org/wiki/Contabilidade">
+            <div class="resource-desc">Aprenda conceitos fundamentais de contabilidade.</div>
+            <a class="resource-btn" target="_blank" rel="noopener noreferrer" href="https://pt.wikipedia.org/wiki/Contabilidade">
               Abrir conteúdo
             </a>
           </div>
@@ -632,282 +735,415 @@ button{
 
 </div>
 
+<script src="js/ai.js"></script>
+
 <script>
-let userEmail = "";
+/**
+ * ==========================================
+ * TODO PARA O FUTURO (AMBIENTE DE PRODUÇÃO)
+ * ==========================================
+ * 1. Mover a lógica de autenticação (Cadastro/Login) para um Backend (Node.js, Python, PHP, etc.).
+ * 2. Criptografar senhas usando bcrypt ou similar (NÃO salvar em texto plano).
+ * 3. Substituir o localStorage por sessões seguras (Cookies HttpOnly) ou JWT.
+ * 4. Fazer chamadas à API da OpenAI através do Backend para proteger sua API Key.
+ * ==========================================
+ */
+
+let currentUser = null;
 let learningStyle = "";
 
-function login(event) {
-  event.preventDefault();
+// ------------------------------------------------------------------
+// INICIALIZAÇÃO
+// ------------------------------------------------------------------
+window.addEventListener("load", () => {
+  const session = localStorage.getItem("professorAI_session");
 
-  const emailInput = document.getElementById("email");
-  userEmail = emailInput.value.split("@")[0];
+  if (!session) return;
 
+  currentUser = JSON.parse(session);
+  learningStyle = currentUser.learningStyle || "";
+
+  if (learningStyle) {
+    openDashboard();
+  } else {
+    hideAllScreens();
+    document.getElementById("onboarding").classList.remove("hidden");
+  }
+});
+
+// ------------------------------------------------------------------
+// NAVEGAÇÃO DE AUTENTICAÇÃO
+// ------------------------------------------------------------------
+function showRegister() {
+  hideAlert("loginAlert");
   document.getElementById("loginScreen").classList.add("hidden");
-  document.getElementById("onboarding").classList.remove("hidden");
+  document.getElementById("registerScreen").classList.remove("hidden");
 }
 
+function showLogin() {
+  hideAlert("registerAlert");
+  document.getElementById("registerScreen").classList.add("hidden");
+  document.getElementById("loginScreen").classList.remove("hidden");
+}
+
+// ------------------------------------------------------------------
+// LÓGICA DE CADASTRO (MOCK)
+// ------------------------------------------------------------------
+function register(event) {
+  event.preventDefault();
+  const btn = document.getElementById("registerBtn");
+  btn.disabled = true;
+
+  const name = document.getElementById("registerName").value.trim();
+  const email = document.getElementById("registerEmail").value.trim().toLowerCase();
+  const password = document.getElementById("registerPassword").value;
+  const confirmPassword = document.getElementById("registerConfirmPassword").value;
+
+  if (name.length < 2) {
+    showAlert("registerAlert", "Digite um nome válido.");
+    btn.disabled = false; return;
+  }
+  if (password.length < 6) {
+    showAlert("registerAlert", "A senha precisa ter pelo menos 6 caracteres.");
+    btn.disabled = false; return;
+  }
+  if (password !== confirmPassword) {
+    showAlert("registerAlert", "As senhas não são iguais.");
+    btn.disabled = false; return;
+  }
+
+  const users = getUsers();
+  const existingUser = users.find(user => user.email === email);
+
+  if (existingUser) {
+    showAlert("registerAlert", "Já existe uma conta com esse email.");
+    btn.disabled = false; return;
+  }
+
+  const newUser = {
+    id: Date.now(),
+    name,
+    email,
+    password, // AVISO: Salvando em texto plano apenas para fins didáticos/protótipo
+    learningStyle: ""
+  };
+
+  users.push(newUser);
+  localStorage.setItem("professorAI_users", JSON.stringify(users));
+
+  currentUser = newUser;
+  saveSession(newUser);
+
+  hideAllScreens();
+  document.getElementById("onboarding").classList.remove("hidden");
+  btn.disabled = false;
+}
+
+// ------------------------------------------------------------------
+// LÓGICA DE LOGIN (MOCK)
+// ------------------------------------------------------------------
+function login(event) {
+  event.preventDefault();
+  const btn = document.getElementById("loginBtn");
+  btn.disabled = true;
+
+  const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+  const password = document.getElementById("loginPassword").value;
+
+  const users = getUsers();
+  const user = users.find(item => item.email === email && item.password === password);
+
+  if (!user) {
+    showAlert("loginAlert", "Email ou senha incorretos. Se ainda não tiver conta, clique em criar conta.");
+    btn.disabled = false; return;
+  }
+
+  currentUser = user;
+  learningStyle = user.learningStyle || "";
+  saveSession(user);
+
+  if (learningStyle) {
+    openDashboard();
+  } else {
+    hideAllScreens();
+    document.getElementById("onboarding").classList.remove("hidden");
+  }
+  btn.disabled = false;
+}
+
+// ------------------------------------------------------------------
+// FLUXO DO USUÁRIO
+// ------------------------------------------------------------------
 function selectLearning(style) {
   learningStyle = style;
 
-  document.getElementById("onboarding").classList.add("hidden");
+  const users = getUsers();
+  const updatedUsers = users.map(user => {
+    if (user.email === currentUser.email) {
+      return { ...user, learningStyle: style };
+    }
+    return user;
+  });
+
+  localStorage.setItem("professorAI_users", JSON.stringify(updatedUsers));
+  currentUser = { ...currentUser, learningStyle: style };
+  saveSession(currentUser);
+
+  openDashboard();
+}
+
+function openDashboard() {
+  hideAllScreens();
   document.getElementById("dashboard").classList.remove("hidden");
 
   const messages = document.getElementById("messages");
-
-  messages.innerHTML = `
-    <div class="message ai fade-in">
-      Olá, <b>${escapeHtml(userEmail)}</b>! 👋<br><br>
-      Percebi que você aprende melhor com <b>${escapeHtml(learningStyle)}</b>.<br><br>
-      Vou adaptar todos os nossos conteúdos para esse formato.<br>
-      O que você gostaria de estudar hoje?
-    </div>
-  `;
+  // Previne duplicação ao fazer login novamente
+  if(messages.children.length === 0) {
+    messages.innerHTML = `
+      <div class="message ai fade-in">
+        Olá, <b>${escapeHtml(currentUser.name)}</b>! 👋<br><br>
+        Percebi que você aprende melhor com <b>${escapeHtml(learningStyle)}</b>.<br><br>
+        Vou adaptar todos os nossos conteúdos para esse formato.<br>
+        O que você gostaria de estudar hoje?
+      </div>
+    `;
+  }
 }
 
+function logout() {
+  localStorage.removeItem("professorAI_session");
+  currentUser = null;
+  learningStyle = "";
+  
+  // Limpa o chat para o próximo usuário
+  document.getElementById("messages").innerHTML = "";
+  
+  // Limpa os formulários
+  document.getElementById("loginEmail").value = "";
+  document.getElementById("loginPassword").value = "";
+
+  hideAllScreens();
+  document.getElementById("loginScreen").classList.remove("hidden");
+}
+
+// ------------------------------------------------------------------
+// SISTEMA DE CHAT E IA
+// ------------------------------------------------------------------
 async function sendMessage(event) {
+  event.preventDefault();
 
-event.preventDefault();
+  const input = document.getElementById("chatInput");
+  const value = input.value.trim();
+  const btn = document.getElementById("sendBtn");
 
-const input =
-document.getElementById("chatInput");
+  if (!value) return;
 
-const value =
-input.value.trim();
+  // Desativa input enquanto processa
+  input.disabled = true;
+  btn.disabled = true;
 
-if (!value) return;
+  const messages = document.getElementById("messages");
 
-const messages =
-document.getElementById("messages");
+  // Mensagem do Usuário
+  const userMessage = document.createElement("div");
+  userMessage.className = "message user fade-in";
+  userMessage.textContent = value;
+  messages.appendChild(userMessage);
 
-const userMessage =
-document.createElement("div");
+  input.value = "";
+  messages.scrollTop = messages.scrollHeight;
 
-userMessage.className =
-"message user fade-in";
+  // Indicador de digitação
+  const typingMessage = document.createElement("div");
+  typingMessage.className = "message ai fade-in";
+  typingMessage.innerHTML = `
+    <div class="typing-indicator">
+      <span></span><span></span><span></span>
+    </div>
+  `;
+  messages.appendChild(typingMessage);
+  messages.scrollTop = messages.scrollHeight;
 
-userMessage.textContent =
-value;
+  try {
+    let aiResponse = "";
 
-messages.appendChild(userMessage);
-
-input.value = "";
-
-messages.scrollTop =
-messages.scrollHeight;
-
-const typingMessage =
-document.createElement("div");
-
-typingMessage.className =
-"message ai fade-in";
-
-typingMessage.innerHTML = `
-<div class="typing-indicator">
-<span></span>
-<span></span>
-<span></span>
-</div>
-`;
-
-messages.appendChild(
-typingMessage
-);
-
-messages.scrollTop =
-messages.scrollHeight;
-
-try {
-
-const aiResponse =
-await callOpenAI([
-
-{
-role:"system",
-
-content:`
-
+    // Tenta chamar a API se configurada via js/ai.js
+    if (typeof callOpenAI === "function") {
+      aiResponse = await callOpenAI([
+        {
+          role: "system",
+          content: `
 Você é um professor particular extremamente didático.
 
 Seu papel é:
-- ensinar,
-- simplificar assuntos difíceis,
-- usar analogias,
-- usar exemplos reais,
+- ensinar, simplificar assuntos difíceis,
+- usar analogias e exemplos reais,
 - adaptar explicações,
-- detectar dificuldades,
-- recomendar vídeos,
-- recomendar PDFs,
-- criar exercícios,
-- ajudar o aluno a evoluir.
+- detectar dificuldades.
 
-O aluno aprende melhor com:
-${learningStyle}
+O aluno aprende melhor com: ${learningStyle}. Adapte-se a isso.
+Nunca fale como suporte técnico. Fale como um professor humano inteligente.
+Use formatação Markdown simples (**negrito**, *itálico*) para destacar pontos chave.
+          `
+        },
+        { role: "user", content: value }
+      ]);
+      aiResponse = formatTextResponse(aiResponse);
+    } else {
+      // Fallback Simulador
+      await new Promise(r => setTimeout(r, 1200)); // Delay artificial
+      aiResponse = generateAIResponse(value);
+    }
 
-Você deve adaptar suas respostas para esse estilo.
+    typingMessage.remove();
 
-Nunca fale como suporte técnico.
-Fale como um professor humano inteligente.
+    const aiMessage = document.createElement("div");
+    aiMessage.className = "message ai fade-in";
+    aiMessage.innerHTML = aiResponse;
 
-`
-},
+    messages.appendChild(aiMessage);
+  } catch(error) {
+    console.error("Erro na comunicação com IA:", error);
+    typingMessage.remove();
 
-{
-role:"user",
-content:value
-}
-
-]);
-
-typingMessage.remove();
-
-const aiMessage =
-document.createElement("div");
-
-aiMessage.className =
-"message ai fade-in";
-
-aiMessage.innerHTML =
-aiResponse;
-
-messages.appendChild(
-aiMessage
-);
-
-messages.scrollTop =
-messages.scrollHeight;
-
-} catch(error){
-
-typingMessage.remove();
-
-const errorMessage =
-document.createElement("div");
-
-errorMessage.className =
-"message ai fade-in";
-
-errorMessage.innerHTML = `
-Desculpe.
-Ocorreu um erro ao conectar com a IA.
-`;
-
-messages.appendChild(
-errorMessage
-);
-
-}
-
+    const aiMessage = document.createElement("div");
+    aiMessage.className = "message ai fade-in";
+    aiMessage.innerHTML = `Ops! Tivemos um problema de conexão. Mostrando resposta simulada...<br><br>${generateAIResponse(value)}`;
+    messages.appendChild(aiMessage);
+  } finally {
+    messages.scrollTop = messages.scrollHeight;
+    input.disabled = false;
+    btn.disabled = false;
+    input.focus();
+  }
 }
 
 function generateAIResponse(question) {
   const text = question.toLowerCase();
 
   if (text.includes("icms") || text.includes("icms-st")) {
-    return `
-      Ótima pergunta. O ICMS é um imposto estadual cobrado sobre a circulação de mercadorias
-      e alguns tipos de serviços.<br><br>
+    return `Ótima pergunta. O **ICMS** é um imposto estadual cobrado sobre a circulação de mercadorias.<br><br>
       Como você aprende melhor com <b>${escapeHtml(learningStyle)}</b>, vamos usar um exemplo prático:<br><br>
-      Imagine que uma loja compra um produto por R$ 100,00 e vende por R$ 150,00.
-      O ICMS incide sobre essa operação conforme a alíquota do estado.
-      No caso do ICMS-ST, parte do imposto é antecipada na cadeia de venda.
-    `;
+      Imagine que uma loja compra um produto por R$ 100 e vende por R$ 150.
+      O ICMS incide sobre essa operação. No **ICMS-ST** (Substituição Tributária), parte do imposto é antecipada logo na fábrica.`;
   }
 
   if (text.includes("contabilidade")) {
-    return `
-      Contabilidade é a área que registra, organiza e interpreta as movimentações financeiras
-      de uma empresa.<br><br>
-      Ela ajuda a responder perguntas como:<br>
-      A empresa teve lucro? Quanto ela deve pagar? Quais são seus bens, dívidas e patrimônio?
-    `;
+    return `**Contabilidade** é a ciência que registra, organiza e interpreta as movimentações financeiras de uma empresa.<br><br>
+      Ela responde:<br>
+      • A empresa teve lucro?<br>
+      • Quanto ela deve pagar de impostos?<br>
+      • Quais são seus bens e dívidas?`;
   }
 
   if (text.includes("pdf")) {
-    return `
-      Posso te ajudar a transformar um PDF em resumo, mapa mental, lista de exercícios
-      ou explicação passo a passo.<br><br>
-      Nesta versão demonstrativa, o envio de arquivos ainda é simulado.
-      Em uma versão completa, você poderia anexar um PDF para análise automática.
-    `;
+    return `Posso te ajudar a transformar um PDF em **resumo, mapa mental ou lista de exercícios**.<br><br>
+      *(Nesta versão demonstrativa, o envio de arquivos é simulado. Em uma versão final, você faria o upload do documento real)*.`;
   }
 
-  if (text.includes("exercício") || text.includes("exercicio") || text.includes("teste")) {
-    return `
-      Claro. Vou criar um exercício rápido para você:<br><br>
-      <b>Pergunta:</b> Qual é a principal função da contabilidade dentro de uma empresa?<br><br>
+  if (text.match(/exercício|exercicio|teste|praticar/)) {
+    return `Claro. Vou criar um exercício rápido para você:<br><br>
+      **Pergunta:** Qual é a principal função da contabilidade dentro de uma empresa?<br><br>
       A) Criar campanhas de marketing<br>
       B) Registrar e interpretar informações financeiras<br>
-      C) Produzir mercadorias<br>
-      D) Contratar funcionários<br><br>
-      Responda com a alternativa que você acha correta.
-    `;
+      C) Produzir mercadorias<br><br>
+      Responda com a letra que achar correta!`;
   }
 
-  if (text.includes("resumo")) {
-    return `
-      Aqui vai um resumo simples:<br><br>
-      <b>1.</b> Primeiro, entenda o conceito principal.<br>
-      <b>2.</b> Depois, veja um exemplo prático.<br>
-      <b>3.</b> Em seguida, resolva exercícios curtos.<br>
-      <b>4.</b> Por fim, revise os pontos em que teve dificuldade.<br><br>
-      Esse método combina bem com seu estilo de aprendizado: <b>${escapeHtml(learningStyle)}</b>.
-    `;
-  }
-
-  return `
-    Entendi sua dúvida: <b>${escapeHtml(question)}</b>.<br><br>
-    Vou adaptar a explicação para seu estilo de aprendizado: <b>${escapeHtml(learningStyle)}</b>.<br><br>
-    Primeiro, vamos quebrar esse assunto em partes simples.
-    Depois posso te passar exemplos, exercícios e um resumo para revisão.
-  `;
+  return `Entendi sua dúvida: *"${escapeHtml(question)}"*.<br><br>
+    Vou adaptar a explicação para focar em **${escapeHtml(learningStyle)}**.<br><br>
+    Vamos quebrar esse assunto em partes. Me diga qual detalhe você quer aprofundar primeiro.`;
 }
 
+// ------------------------------------------------------------------
+// AÇÕES SECUNDÁRIAS
+// ------------------------------------------------------------------
 function focusChat() {
-  const input = document.getElementById("chatInput");
-  input.focus();
+  document.getElementById("chatInput").focus();
 }
 
 function activateFocusMode() {
   const messages = document.getElementById("messages");
-
   const focusMessage = document.createElement("div");
   focusMessage.className = "message ai fade-in";
   focusMessage.innerHTML = `
-    Modo foco ativado. 🎯<br><br>
-    Vamos estudar em blocos curtos: explicação, exemplo, exercício e revisão.
-    Me diga o tema que você quer estudar agora.
+    **Modo foco ativado!** 🎯<br><br>
+    Neste modo, estudamos em blocos curtos: <i>Explicação ➔ Exemplo ➔ Exercício ➔ Revisão</i>.<br>
+    Me diga o tema que você quer focar agora.
   `;
-
   messages.appendChild(focusMessage);
   messages.scrollTop = messages.scrollHeight;
-
   focusChat();
 }
 
 function fakePdfDownload(event) {
   event.preventDefault();
-
   const messages = document.getElementById("messages");
-
   const pdfMessage = document.createElement("div");
   pdfMessage.className = "message ai fade-in";
-  pdfMessage.innerHTML = `
-    O recurso de PDF está em modo demonstração.<br><br>
-    Posso simular um resumo inteligente aqui no chat. Digite o tema do PDF que você gostaria de revisar.
-  `;
-
+  pdfMessage.innerHTML = `O recurso de download de PDF está em demonstração. Digite no chat o tema do PDF que você gostaria de revisar.`;
   messages.appendChild(pdfMessage);
   messages.scrollTop = messages.scrollHeight;
 }
 
+// ------------------------------------------------------------------
+// UTILITÁRIOS
+// ------------------------------------------------------------------
+function getUsers() {
+  return JSON.parse(localStorage.getItem("professorAI_users")) || [];
+}
+
+function saveSession(user) {
+  localStorage.setItem("professorAI_session", JSON.stringify(user));
+}
+
+function hideAllScreens() {
+  document.getElementById("loginScreen").classList.add("hidden");
+  document.getElementById("registerScreen").classList.add("hidden");
+  document.getElementById("onboarding").classList.add("hidden");
+  document.getElementById("dashboard").classList.add("hidden");
+}
+
+function showAlert(id, message) {
+  const alert = document.getElementById(id);
+  alert.textContent = message;
+  alert.style.display = "block";
+}
+
+function hideAlert(id) {
+  const alert = document.getElementById(id);
+  alert.textContent = "";
+  alert.style.display = "none";
+}
+
 function escapeHtml(text) {
   const div = document.createElement("div");
-  div.textContent = text;
+  div.textContent = text || "";
   return div.innerHTML;
 }
-</script>
 
-<script src="js/ai.js"></script>
+/**
+ * Processador básico de Markdown para formatar respostas da IA.
+ * Converte **negrito**, *itálico* e quebras de linha em tags HTML.
+ */
+function formatTextResponse(text) {
+  if (!text) return "";
+  
+  // 1. Escapar HTML para evitar XSS (Cross-Site Scripting)
+  let safeText = escapeHtml(text);
+  
+  // 2. Converter Markdown Bold (**texto**)
+  safeText = safeText.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+  
+  // 3. Converter Markdown Italic (*texto*)
+  safeText = safeText.replace(/\*(.*?)\*/g, '<i>$1</i>');
+  
+  // 4. Converter quebras de linha em <br>
+  safeText = safeText.replace(/\n/g, "<br>");
+  
+  return safeText;
+}
+</script>
 
 </body>
 </html>
