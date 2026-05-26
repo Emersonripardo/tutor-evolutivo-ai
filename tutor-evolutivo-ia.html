@@ -1,853 +1,1625 @@
-Analisei e deixei a versão mais segura, organizada e completa: valida entrada, evita XSS, adiciona voltar no onboarding, recomeçar jornada, risco de abandono dinâmico, progresso, XP e chat melhor estruturado.
-
-```html
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Tutor Evolutivo AI</title>
 
-<meta name="description" content="Aprenda com uma IA que entende você e adapta o ritmo ao seu estado emocional." />
-<meta property="og:title" content="Tutor Evolutivo AI" />
-<meta property="og:description" content="Plataforma inteligente com sistema anti-abandono e aprendizado adaptativo." />
-<meta property="og:type" content="website" />
+<title>Tutor Evolutivo AI</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
 :root{
-  --bg:#050505;
-  --surface:rgba(255,255,255,.055);
-  --surface-2:rgba(255,255,255,.035);
-  --border:rgba(255,255,255,.09);
-  --border-hover:rgba(255,255,255,.18);
-  --text:#f8fafc;
-  --muted:#a1a1aa;
-  --muted-2:#71717a;
-  --primary:#6366f1;
-  --primary-hover:#7c83ff;
-  --green:#22c55e;
-  --orange:#f97316;
-  --purple:#8b5cf6;
-  --red:#ef4444;
+
+--bg:#050505;
+--surface:rgba(255,255,255,.05);
+--surface-2:rgba(255,255,255,.03);
+
+--border:rgba(255,255,255,.08);
+
+--text:#f8fafc;
+--muted:#a1a1aa;
+
+--primary:#6366f1;
+--primary-hover:#7c83ff;
+
+--green:#22c55e;
+--orange:#f97316;
+--purple:#8b5cf6;
+--red:#ef4444;
+
 }
 
 body{
-  min-height:100vh;
-  overflow-x:hidden;
-  background:var(--bg);
-  color:var(--text);
-  font-family:"Inter",sans-serif;
+
+font-family:'Inter',sans-serif;
+background:var(--bg);
+color:var(--text);
+overflow-x:hidden;
+min-height:100vh;
+
 }
 
-h1,h2,h3,.btn{font-family:"Syne",sans-serif}
-button,input{font:inherit}
-button:focus-visible,input:focus-visible{
-  outline:3px solid rgba(99,102,241,.45);
-  outline-offset:3px;
+h1,h2,h3,.btn{
+
+font-family:'Syne',sans-serif;
+
 }
 
-.background{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:-1}
-.glow{position:absolute;border-radius:50%;filter:blur(140px);opacity:.22;animation:float 8s ease-in-out infinite}
-.glow1{width:700px;height:700px;background:#6366f1;top:-200px;right:-200px}
-.glow2{width:500px;height:500px;background:#8b5cf6;bottom:-200px;left:-100px;animation-delay:2s}
-.grid-bg{
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  z-index:-1;
-  background-image:
-    linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);
-  background-size:56px 56px;
-  mask-image:linear-gradient(to bottom,black,transparent 88%);
+.background{
+
+position:fixed;
+inset:0;
+overflow:hidden;
+pointer-events:none;
+z-index:-1;
+
 }
 
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(30px)}}
+.glow{
+
+position:absolute;
+border-radius:50%;
+filter:blur(140px);
+opacity:.22;
+animation:float 8s ease-in-out infinite;
+
+}
+
+.glow1{
+
+width:700px;
+height:700px;
+background:#6366f1;
+top:-200px;
+right:-200px;
+
+}
+
+.glow2{
+
+width:500px;
+height:500px;
+background:#8b5cf6;
+bottom:-200px;
+left:-100px;
+animation-delay:2s;
+
+}
+
+@keyframes float{
+
+0%,100%{
+transform:translateY(0px);
+}
+
+50%{
+transform:translateY(30px);
+}
+
+}
 
 .glass{
-  background:var(--surface);
-  backdrop-filter:blur(22px);
-  border:1px solid var(--border);
-  box-shadow:0 24px 100px rgba(0,0,0,.24);
+
+background:var(--surface);
+backdrop-filter:blur(22px);
+border:1px solid var(--border);
+
 }
 
-.container{max-width:1280px;margin:auto;padding:40px 24px}
-.grid{display:grid;gap:20px}
-.grid-2{grid-template-columns:1fr 1fr}
-.grid-3{grid-template-columns:repeat(3,1fr)}
-.card{padding:28px;border-radius:24px}
+.container{
 
-.hero{min-height:100vh;display:flex;align-items:center}
-.hero-content{display:grid;grid-template-columns:1.08fr .92fr;gap:72px;align-items:center}
-.hero-title{font-size:clamp(46px,7vw,86px);line-height:.94;letter-spacing:-2px;margin-bottom:24px}
-.hero-description{font-size:20px;line-height:1.8;color:var(--muted);max-width:650px;margin-bottom:36px}
+max-width:1280px;
+margin:auto;
+padding:40px 24px;
+
+}
+
+.grid{
+
+display:grid;
+gap:20px;
+
+}
+
+.grid-2{
+
+grid-template-columns:1fr 1fr;
+
+}
+
+.grid-3{
+
+grid-template-columns:repeat(3,1fr);
+
+}
+
+.card{
+
+padding:28px;
+border-radius:28px;
+
+}
+
+.hero{
+
+min-height:100vh;
+display:flex;
+align-items:center;
+
+}
+
+.hero-content{
+
+display:grid;
+grid-template-columns:1.1fr .9fr;
+gap:80px;
+align-items:center;
+
+}
+
+.hero-title{
+
+font-size:clamp(60px,8vw,96px);
+line-height:.92;
+letter-spacing:-4px;
+margin-bottom:24px;
+
+}
+
+.hero-description{
+
+font-size:20px;
+line-height:1.8;
+color:var(--muted);
+max-width:650px;
+margin-bottom:40px;
+
+}
 
 .btn{
-  border:0;
-  cursor:pointer;
-  transition:.22s;
-  font-weight:800;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
+
+border:none;
+cursor:pointer;
+transition:.25s;
+font-weight:700;
+
 }
 
-.btn:hover{transform:translateY(-2px)}
-.btn:disabled{cursor:not-allowed;opacity:.55;transform:none}
-.btn-primary{background:var(--primary);color:white;box-shadow:0 0 40px rgba(99,102,241,.28)}
-.btn-primary:hover{background:var(--primary-hover)}
-.btn-soft{background:rgba(255,255,255,.055);border:1px solid var(--border);color:white}
-.btn-soft:hover{background:rgba(255,255,255,.095);border-color:var(--border-hover)}
+.btn:hover{
+
+transform:translateY(-2px);
+
+}
+
+.btn-primary{
+
+background:var(--primary);
+color:white;
+
+}
+
+.btn-primary:hover{
+
+background:var(--primary-hover);
+
+}
+
+.btn-soft{
+
+background:rgba(255,255,255,.05);
+border:1px solid var(--border);
+color:white;
+
+}
 
 .input{
-  width:100%;
-  padding:18px 20px;
-  border-radius:16px;
-  background:rgba(255,255,255,.045);
-  border:1px solid var(--border);
-  color:white;
-  font-size:16px;
-  outline:none;
-  transition:.22s;
+
+width:100%;
+padding:18px 20px;
+border-radius:18px;
+background:rgba(255,255,255,.04);
+border:1px solid var(--border);
+color:white;
+font-size:16px;
+outline:none;
+
 }
 
-.input:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(99,102,241,.15)}
+.input:focus{
 
-.progress{height:8px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden}
-.progress-bar{height:100%;background:linear-gradient(90deg,#6366f1,#8b5cf6);transition:.5s ease}
+border-color:var(--primary);
 
-.fade{animation:fade .45s ease both}
-@keyframes fade{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+}
+
+.progress{
+
+height:8px;
+background:rgba(255,255,255,.05);
+border-radius:999px;
+overflow:hidden;
+
+}
+
+.progress-bar{
+
+height:100%;
+background:linear-gradient(90deg,#6366f1,#8b5cf6);
+transition:.5s ease;
+
+}
+
+.fade{
+
+animation:fade .5s ease forwards;
+
+}
+
+@keyframes fade{
+
+from{
+opacity:0;
+transform:translateY(20px);
+}
+
+to{
+opacity:1;
+transform:translateY(0px);
+}
+
+}
 
 .chat{
-  height:420px;
-  overflow:auto;
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-  padding-right:8px;
-  scroll-behavior:smooth;
-}
 
-.chat::-webkit-scrollbar{width:6px}
-.chat::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:999px}
+height:420px;
+overflow:auto;
+display:flex;
+flex-direction:column;
+gap:14px;
+padding-right:8px;
+
+}
 
 .bubble{
-  max-width:82%;
-  padding:16px 18px;
-  border-radius:19px;
-  line-height:1.7;
-  white-space:pre-wrap;
-  overflow-wrap:anywhere;
+
+max-width:80%;
+padding:16px 18px;
+border-radius:20px;
+line-height:1.7;
+
 }
 
-.ai{align-self:flex-start;background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.22)}
-.user{align-self:flex-end;background:rgba(255,255,255,.055);border:1px solid var(--border)}
+.ai{
+
+align-self:flex-start;
+background:rgba(99,102,241,.12);
+border:1px solid rgba(99,102,241,.2);
+
+}
+
+.user{
+
+align-self:flex-end;
+background:rgba(255,255,255,.05);
+border:1px solid var(--border);
+
+}
 
 .roadmap-item{
-  padding:18px;
-  border-radius:18px;
-  background:var(--surface-2);
-  border:1px solid var(--border);
-  display:grid;
-  grid-template-columns:1fr auto;
-  gap:14px;
-  align-items:center;
-  margin-bottom:12px;
-  transition:.22s;
+
+padding:18px;
+border-radius:18px;
+background:rgba(255,255,255,.03);
+border:1px solid var(--border);
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+margin-bottom:12px;
+
 }
 
-.roadmap-item:hover{transform:translateX(4px);border-color:var(--border-hover)}
-.roadmap-title{min-width:0;overflow-wrap:anywhere;line-height:1.45}
-
 .level{
-  display:inline-flex;
-  align-items:center;
-  gap:10px;
-  padding:10px 16px;
-  border-radius:999px;
-  background:rgba(99,102,241,.15);
-  border:1px solid rgba(99,102,241,.22);
-  font-weight:700;
-  font-size:14px;
+
+display:inline-flex;
+align-items:center;
+gap:10px;
+
+padding:10px 16px;
+border-radius:999px;
+
+background:rgba(99,102,241,.15);
+border:1px solid rgba(99,102,241,.2);
+
 }
 
 .modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.75);
-  backdrop-filter:blur(8px);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:24px;
-  z-index:999;
+
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.75);
+
+backdrop-filter:blur(8px);
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+padding:24px;
+
+z-index:999;
+
 }
 
 .modal-box{
-  width:100%;
-  max-width:620px;
-  padding:32px;
-  border-radius:24px;
-  background:#101012;
-  border:1px solid var(--border);
-  max-height:86vh;
-  overflow:auto;
-  animation:fade .28s ease;
+
+width:100%;
+max-width:620px;
+
+padding:32px;
+border-radius:28px;
+
+background:#111;
+border:1px solid var(--border);
+
+max-height:85vh;
+overflow:auto;
+
 }
 
-.typing{display:flex;gap:5px;padding:4px}
-.typing span{width:8px;height:8px;border-radius:50%;background:#8b5cf6;animation:typing 1.2s infinite ease-in-out}
-.typing span:nth-child(2){animation-delay:.2s}
-.typing span:nth-child(3){animation-delay:.4s}
-@keyframes typing{0%,100%{transform:scale(.4);opacity:.5}50%{transform:scale(1);opacity:1}}
+.typing{
+
+display:flex;
+gap:5px;
+padding:4px;
+
+}
+
+.typing span{
+
+width:8px;
+height:8px;
+border-radius:50%;
+background:#8b5cf6;
+
+animation:typing 1.2s infinite ease-in-out;
+
+}
+
+.typing span:nth-child(2){
+
+animation-delay:.2s;
+
+}
+
+.typing span:nth-child(3){
+
+animation-delay:.4s;
+
+}
+
+@keyframes typing{
+
+0%,100%{
+transform:scale(.4);
+opacity:.5;
+}
+
+50%{
+transform:scale(1);
+opacity:1;
+}
+
+}
 
 .lesson-box{
-  padding:20px;
-  border-radius:20px;
-  background:rgba(99,102,241,.08);
-  border:1px solid rgba(99,102,241,.16);
-  line-height:1.8;
+
+padding:22px;
+border-radius:22px;
+
+background:rgba(99,102,241,.08);
+border:1px solid rgba(99,102,241,.15);
+
+line-height:1.8;
+
 }
 
-.badge{padding:12px 18px;border-radius:999px;font-size:14px;font-weight:700}
-.small{font-size:13px;color:var(--muted-2);line-height:1.6}
+.badge{
 
-.toast{
-  position:fixed;
-  top:18px;
-  right:18px;
-  z-index:998;
-  max-width:380px;
-  padding:16px 18px;
-  border-radius:16px;
-  background:#101012;
-  border:1px solid rgba(99,102,241,.35);
-  box-shadow:0 20px 70px rgba(0,0,0,.35);
+padding:12px 18px;
+border-radius:999px;
+font-size:14px;
+
 }
 
 @media(max-width:900px){
-  .container{padding:28px 18px}
-  .grid-2,.grid-3,.hero-content{grid-template-columns:1fr}
-  .hero{padding-top:88px;padding-bottom:64px}
-  .hero-title{font-size:46px;letter-spacing:-1px}
-  .hero-content{gap:28px}
-  .bubble{max-width:94%}
+
+.grid-2,
+.grid-3,
+.hero-content{
+
+grid-template-columns:1fr;
+
 }
 
-@media(max-width:560px){
-  .card{padding:20px;border-radius:20px}
-  .hero-title{font-size:40px}
-  .hero-description{font-size:17px}
-  .roadmap-item{grid-template-columns:1fr}
+.hero{
+
+padding-top:100px;
+padding-bottom:80px;
+
 }
+
+.hero-title{
+
+font-size:58px;
+
+}
+
+}
+
 </style>
 </head>
 
 <body>
-<div class="background">
-  <div class="glow glow1"></div>
-  <div class="glow glow2"></div>
-</div>
-<div class="grid-bg"></div>
 
-<main id="app"></main>
+<div class="background">
+
+<div class="glow glow1"></div>
+<div class="glow glow2"></div>
+
+</div>
+
+<div id="app"></div>
 
 <script>
+
 const app = document.getElementById("app")
-const STORAGE_KEY = "tutorAI:v2"
-
-const motivationalLines = [
-  "Pequenos passos ainda contam.",
-  "Você está evoluindo mais do que imagina.",
-  "Consistência muda destinos.",
-  "Seu futuro agradece pela disciplina de hoje.",
-  "Você já avançou mais do que acredita."
-]
-
-const questions = [
-  { key:"goal", question:"Qual transformação você busca?", placeholder:"Ex: Me tornar especialista fiscal" },
-  { key:"motivation", question:"Por que isso é importante para você?", placeholder:"Ex: Crescimento profissional" },
-  { key:"time", question:"Quanto tempo real você possui por dia?", placeholder:"Ex: 15 minutos" },
-  { key:"bestTime", question:"Qual horário você rende melhor?", placeholder:"Ex: Noite" },
-  { key:"learningStyle", question:"Como você aprende melhor?", placeholder:"Ex: Visual e prática" },
-  { key:"difficulty", question:"O que normalmente faz você desistir?", placeholder:"Ex: Procrastinação" }
-]
 
 let currentQuestion = 0
-let state = loadState()
 
-function defaultState(){
-  return {
-    xp:120,
-    streak:4,
-    level:"Consistente",
-    emotion:"motivado",
-    emotionHistory:[],
-    dropRisk:"baixo",
-    completedLessons:1,
-    chatHistory:[],
-    userData:{},
-    plan:null
-  }
+let state = JSON.parse(
+localStorage.getItem("tutorAI")
+) || {
+
+xp:120,
+streak:4,
+level:"Consistente",
+
+emotion:"motivado",
+
+emotionHistory:[],
+
+dropRisk:"baixo",
+
+chatHistory:[],
+
+userData:{},
+
+plan:null
+
 }
 
-function loadState(){
-  try{
-    return { ...defaultState(), ...JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}") }
-  }catch(error){
-    console.error("Erro ao ler localStorage", error)
-    return defaultState()
-  }
+const questions = [
+
+{
+key:"goal",
+question:"Qual transformação você busca?",
+placeholder:"Ex: Me tornar especialista fiscal"
+},
+
+{
+key:"motivation",
+question:"Por que isso é importante para você?",
+placeholder:"Ex: Crescimento profissional"
+},
+
+{
+key:"time",
+question:"Quanto tempo REAL você possui por dia?",
+placeholder:"Ex: 15 minutos"
+},
+
+{
+key:"bestTime",
+question:"Qual horário você rende melhor?",
+placeholder:"Ex: Noite"
+},
+
+{
+key:"learningStyle",
+question:"Como você aprende melhor?",
+placeholder:"Ex: Visual e prática"
+},
+
+{
+key:"difficulty",
+question:"O que normalmente faz você desistir?",
+placeholder:"Ex: Procrastinação"
 }
+
+]
 
 function save(){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
-}
 
-function escapeHTML(value){
-  return String(value ?? "").replace(/[&<>'"]/g, char => ({
-    "&":"&amp;",
-    "<":"&lt;",
-    ">":"&gt;",
-    "'":"&#39;",
-    "\"":"&quot;"
-  }[char]))
-}
+localStorage.setItem(
+"tutorAI",
+JSON.stringify(state)
+)
 
-function textToHTML(value){
-  return escapeHTML(value).replace(/\n/g, "<br>")
-}
-
-function showToast(message){
-  const oldToast = document.getElementById("toast")
-  if(oldToast) oldToast.remove()
-
-  const toast = document.createElement("div")
-  toast.id = "toast"
-  toast.className = "toast fade"
-  toast.textContent = message
-  document.body.appendChild(toast)
-
-  setTimeout(() => toast.remove(), 3200)
 }
 
 function renderLanding(){
-  const hasPlan = Boolean(state.plan)
 
-  app.innerHTML = `
-    <section class="hero">
-      <div class="container">
-        <div class="hero-content">
-          <div class="fade">
-            <div class="glass badge" style="display:inline-flex;margin-bottom:24px;">
-              AI Emotional Learning System
-            </div>
+app.innerHTML = `
 
-            <h1 class="hero-title">Aprenda com uma IA que entende você</h1>
+<section class="hero">
 
-            <p class="hero-description">
-              Uma plataforma inteligente que adapta ritmo, dificuldade, motivação, tempo e formato de estudo com base no seu comportamento.
-            </p>
+<div class="container">
 
-            <div style="display:flex;gap:12px;flex-wrap:wrap;">
-              <button class="btn btn-primary" onclick="${hasPlan ? "renderDashboard()" : "startOnboarding()"}" style="padding:20px 34px;border-radius:20px;font-size:18px;">
-                ${hasPlan ? "Continuar jornada" : "Começar jornada"}
-              </button>
+<div class="hero-content">
 
-              <button class="btn btn-soft" onclick="resetApp()" style="padding:20px 24px;border-radius:20px;font-size:18px;">
-                Recomeçar
-              </button>
-            </div>
-          </div>
+<div class="fade">
 
-          <div class="glass card fade">
-            <div style="display:flex;justify-content:space-between;gap:18px;margin-bottom:28px;">
-              <div>
-                <div style="color:var(--muted);margin-bottom:8px;">Sistema</div>
-                <div style="font-size:32px;font-weight:800;">Tutor Evolutivo AI</div>
-              </div>
-              <div class="level">IA Ativa</div>
-            </div>
+<div class="glass badge">
+🚀 AI Emotional Learning System
+</div>
 
-            <div class="roadmap-item">
-              <span class="roadmap-title">IA emocional</span>
-              <span>100%</span>
-            </div>
+<h1 class="hero-title">
+Aprenda com uma IA que entende você
+</h1>
 
-            <div class="roadmap-item">
-              <span class="roadmap-title">Anti abandono</span>
-              <span>100%</span>
-            </div>
+<p class="hero-description">
 
-            <div class="roadmap-item">
-              <span class="roadmap-title">Aprendizado adaptativo</span>
-              <span>100%</span>
-            </div>
+Uma plataforma inteligente que adapta:
+ritmo, dificuldade, motivação, tempo e formato de estudo com base no seu comportamento.
 
-            <div class="lesson-box" style="margin-top:20px;">
-              A IA entende emoção, tempo, procrastinação, dificuldade e energia mental.
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  `
+</p>
+
+<button
+class="btn btn-primary"
+onclick="${
+state.plan
+? 'renderDashboard()'
+: 'startOnboarding()'
+}"
+style="
+padding:20px 36px;
+border-radius:22px;
+font-size:18px;
+">
+
+${
+state.plan
+? 'Continuar Jornada →'
+: 'Começar Jornada →'
+}
+
+</button>
+
+</div>
+
+<div class="glass card fade">
+
+<div style="
+display:flex;
+justify-content:space-between;
+margin-bottom:28px;
+">
+
+<div>
+
+<div style="
+color:var(--muted);
+margin-bottom:8px;
+">
+Sistema
+</div>
+
+<div style="
+font-size:32px;
+font-weight:800;
+">
+Tutor Evolutivo AI
+</div>
+
+</div>
+
+<div class="level">
+🧠 IA Ativa
+</div>
+
+</div>
+
+<div class="roadmap-item">
+<span>✅ IA emocional</span>
+<span>100%</span>
+</div>
+
+<div class="roadmap-item">
+<span>⚡ Anti abandono</span>
+<span>100%</span>
+</div>
+
+<div class="roadmap-item">
+<span>🚀 Aprendizado adaptativo</span>
+<span>100%</span>
+</div>
+
+<div class="lesson-box"
+style="margin-top:20px;">
+
+A IA entende:
+- emoção,
+- tempo,
+- procrastinação,
+- dificuldade,
+- energia mental.
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+`
+
 }
 
 function startOnboarding(){
-  currentQuestion = 0
-  state.userData = {}
-  state.plan = null
-  state.chatHistory = []
-  state.completedLessons = 1
-  state.dropRisk = "baixo"
-  save()
-  renderQuestion()
+
+renderQuestion()
+
 }
 
 function renderQuestion(){
-  const q = questions[currentQuestion]
-  const pct = Math.round((currentQuestion / questions.length) * 100)
 
-  app.innerHTML = `
-    <section style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;">
-      <div class="glass card fade" style="width:100%;max-width:650px;">
-        <div class="progress" style="margin-bottom:14px;">
-          <div class="progress-bar" style="width:${pct}%;"></div>
-        </div>
+const q = questions[currentQuestion]
 
-        <div style="font-size:13px;color:var(--muted);margin-bottom:28px;">
-          Etapa ${currentQuestion + 1} de ${questions.length}
-        </div>
+const pct =
+(currentQuestion/questions.length)*100
 
-        <h1 style="font-size:clamp(32px,6vw,48px);line-height:1.15;margin-bottom:28px;">
-          ${escapeHTML(q.question)}
-        </h1>
+app.innerHTML = `
 
-        <form onsubmit="event.preventDefault(); nextQuestion();">
-          <input id="answer" class="input" placeholder="${escapeHTML(q.placeholder)}" autocomplete="off" />
-          <div id="fieldError" class="small" style="min-height:22px;margin-top:10px;color:#fca5a5;"></div>
+<section style="
+min-height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:24px;
+">
 
-          <div style="display:flex;gap:12px;margin-top:14px;">
-            <button type="button" class="btn btn-soft" onclick="previousQuestion()" ${currentQuestion === 0 ? "disabled" : ""} style="flex:1;padding:18px;border-radius:18px;">
-              Voltar
-            </button>
-            <button type="submit" class="btn btn-primary" style="flex:2;padding:18px;border-radius:18px;">
-              Continuar
-            </button>
-          </div>
-        </form>
-      </div>
-    </section>
-  `
+<div class="glass card fade"
+style="
+width:100%;
+max-width:650px;
+">
 
-  const input = document.getElementById("answer")
-  input.value = state.userData[q.key] || ""
-  setTimeout(() => input.focus(), 80)
+<div class="progress"
+style="margin-bottom:14px;">
+
+<div
+class="progress-bar"
+style="width:${pct}%;">
+</div>
+
+</div>
+
+<div style="
+font-size:13px;
+color:var(--muted);
+margin-bottom:28px;
+">
+
+Etapa ${currentQuestion+1} de ${questions.length}
+
+</div>
+
+<h1 style="
+font-size:48px;
+line-height:1.2;
+margin-bottom:28px;
+">
+
+${q.question}
+
+</h1>
+
+<input
+id="answer"
+class="input"
+placeholder="${q.placeholder}"
+onkeypress="if(event.key==='Enter')nextQuestion()"
+/>
+
+<button
+class="btn btn-primary"
+onclick="nextQuestion()"
+style="
+width:100%;
+padding:18px;
+border-radius:20px;
+margin-top:18px;
+font-size:18px;
+">
+
+Continuar →
+
+</button>
+
+</div>
+
+</section>
+
+`
+
+setTimeout(()=>{
+
+document.getElementById("answer").focus()
+
+},100)
+
 }
 
 function nextQuestion(){
-  const input = document.getElementById("answer")
-  const error = document.getElementById("fieldError")
-  const value = input.value.trim()
 
-  if(value.length < 2){
-    input.style.borderColor = "var(--red)"
-    error.textContent = "Digite uma resposta um pouco mais completa para continuar."
-    return
-  }
+const input =
+document.getElementById("answer")
 
-  state.userData[questions[currentQuestion].key] = value
-  save()
+const value =
+input.value.trim()
 
-  currentQuestion++
+if(!value){
 
-  if(currentQuestion >= questions.length){
-    generatePlan()
-    return
-  }
+input.style.borderColor =
+"var(--red)"
 
-  renderQuestion()
+return
+
 }
 
-function previousQuestion(){
-  if(currentQuestion === 0) return
-  currentQuestion--
-  renderQuestion()
+state.userData[
+questions[currentQuestion].key
+] = value
+
+save()
+
+currentQuestion++
+
+if(currentQuestion >= questions.length){
+
+generatePlan()
+return
+
+}
+
+renderQuestion()
+
 }
 
 function generatePlan(){
-  const difficulty = (state.userData.difficulty || "").toLowerCase()
 
-  state.dropRisk =
-    difficulty.includes("procrast") || difficulty.includes("cansa") || difficulty.includes("tempo")
-      ? "médio"
-      : "baixo"
+state.plan = {
 
-  state.plan = {
-    roadmap:[
-      { title:"Mentalidade e clareza de objetivo", status:"done", percent:100 },
-      { title:"Fundamentos essenciais", status:"active", percent:42 },
-      { title:"Prática guiada e repetição inteligente", status:"locked", percent:0 },
-      { title:"Especialização e autonomia", status:"locked", percent:0 }
-    ],
-    nextSession: buildNextSession()
-  }
+roadmap:[
 
-  save()
-  renderDashboard()
+{
+title:"Mentalidade",
+status:"done",
+percent:100
+},
+
+{
+title:"Fundamentos",
+status:"active",
+percent:42
+},
+
+{
+title:"Prática",
+status:"locked",
+percent:0
+},
+
+{
+title:"Especialização",
+status:"locked",
+percent:0
 }
 
-function buildNextSession(){
-  const user = state.userData
-  return `Estudar por ${user.time || "15 minutos"} no período de maior energia (${user.bestTime || "horário ideal"}), usando ${user.learningStyle || "prática guiada"}.`
+]
+
+}
+
+save()
+
+renderDashboard()
+
 }
 
 function renderDashboard(){
-  const user = state.userData
 
-  if(!state.plan) generatePlan()
+const user = state.userData
 
-  if(state.chatHistory.length === 0){
-    state.chatHistory.push({
-      role:"assistant",
-      content:`Olá. Analisei seu perfil.
-Seu foco atual é: ${user.goal}.
-Seu maior risco de abandono: ${user.difficulty}.
-Vou adaptar sua rotina com base no seu horário ideal, energia mental e consistência.`
-    })
-    save()
-  }
+if(state.chatHistory.length === 0){
 
-  app.innerHTML = `
-    <div class="container fade">
-      <div style="display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:28px;">
-        <div>
-          <h1 style="font-size:clamp(38px,5vw,58px);margin-bottom:12px;">
-            Tutor Evolutivo AI
-          </h1>
-          <p style="font-size:18px;color:var(--muted);">
-            Sistema emocional de aprendizado adaptativo.
-          </p>
-        </div>
+state.chatHistory.push({
 
-        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
-          <div class="level">🔥 ${state.streak} dias</div>
-          <div class="level">⭐ ${state.xp} XP</div>
-          <div class="level">🏆 ${escapeHTML(state.level)}</div>
-          <button class="btn btn-soft" onclick="resetApp()" style="padding:10px 16px;border-radius:999px;">Reset</button>
-        </div>
-      </div>
+role:"assistant",
 
-      <div class="grid grid-3" style="margin-bottom:20px;">
-        ${infoCard("Objetivo", user.goal)}
-        ${infoCard("Melhor horário", user.bestTime)}
-        ${infoCard("Risco de abandono", state.dropRisk)}
-      </div>
+content:`
+Olá.
 
-      <div class="grid grid-2">
-        <div class="glass card">
-          <h2 style="font-size:32px;margin-bottom:24px;">Roadmap Inteligente</h2>
+Analisei seu perfil.
 
-          ${state.plan.roadmap.map(renderRoadmapItem).join("")}
+Seu foco atual é:
+${user.goal}.
 
-          <div class="lesson-box" style="margin-top:20px;">
-            A IA percebeu que você aprende melhor usando: <strong>${escapeHTML(user.learningStyle)}</strong>
-          </div>
+Seu maior risco de abandono:
+${user.difficulty}.
 
-          <div class="lesson-box" style="margin-top:14px;background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.18);">
-            Próxima sessão: ${escapeHTML(state.plan.nextSession)}
-          </div>
+Vou adaptar sua rotina baseada:
+- no seu horário ideal,
+- energia mental,
+- nível de dificuldade,
+- consistência.
 
-          <button class="btn btn-primary" onclick="completeLesson()" style="width:100%;padding:16px;border-radius:18px;margin-top:16px;">
-            Finalizar atividade (+50 XP)
-          </button>
-        </div>
+`
 
-        <div style="display:flex;flex-direction:column;gap:18px;">
-          <div class="glass card">
-            <h2 style="font-size:28px;margin-bottom:18px;">Materiais Inteligentes</h2>
-            <p style="color:var(--muted);line-height:1.7;margin-bottom:20px;">
-              A IA adapta o formato ideal para você.
-            </p>
+})
 
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-              <button class="btn btn-soft" onclick="generateMaterial('pdf')" style="padding:16px;border-radius:18px;">PDF</button>
-              <button class="btn btn-soft" onclick="generateMaterial('podcast')" style="padding:16px;border-radius:18px;">Podcast</button>
-              <button class="btn btn-soft" onclick="generateMaterial('flashcards')" style="padding:16px;border-radius:18px;">Flashcards</button>
-              <button class="btn btn-soft" onclick="generateMaterial('quiz')" style="padding:16px;border-radius:18px;">Quiz</button>
-            </div>
-          </div>
+save()
 
-          <div class="glass card">
-            <h2 style="font-size:28px;margin-bottom:18px;">Sistema Anti-Abandono</h2>
-            <p style="line-height:1.8;color:var(--muted);margin-bottom:18px;">
-              O tutor detecta procrastinação, queda de energia e dificuldade.
-            </p>
-            <button class="btn btn-primary" onclick="simulateDropout()" style="width:100%;padding:16px;border-radius:18px;">
-              Ativar simulação
-            </button>
-          </div>
-
-          <div class="glass card">
-            <h2 style="font-size:28px;margin-bottom:18px;">Estado emocional</h2>
-            <div style="display:flex;gap:10px;flex-wrap:wrap;">
-              <button class="btn btn-soft" onclick="setEmotion('motivado')" style="flex:1;padding:14px;border-radius:16px;">Motivado</button>
-              <button class="btn btn-soft" onclick="setEmotion('cansado')" style="flex:1;padding:14px;border-radius:16px;">Cansado</button>
-              <button class="btn btn-soft" onclick="setEmotion('desmotivado')" style="flex:1;padding:14px;border-radius:16px;">Desmotivado</button>
-            </div>
-            <p class="small" style="margin-top:12px;">Atual: ${escapeHTML(state.emotion)}</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="glass card" style="margin-top:22px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:24px;flex-wrap:wrap;">
-          <h2 style="font-size:32px;">Tutor Inteligente</h2>
-          <div class="level">Memória Emocional Ativa</div>
-        </div>
-
-        <div id="chat" class="chat">
-          ${renderChatHistory()}
-        </div>
-
-        <form onsubmit="event.preventDefault(); sendMessage();" style="display:flex;gap:12px;margin-top:18px;">
-          <input id="chatInput" class="input" placeholder="Pergunte algo ao tutor..." autocomplete="off" />
-          <button type="submit" class="btn btn-primary" style="padding:0 28px;border-radius:18px;">Enviar</button>
-        </form>
-      </div>
-    </div>
-  `
-
-  scrollChat()
 }
 
-function infoCard(label, value){
-  return `
-    <div class="glass card">
-      <div style="color:var(--muted);margin-bottom:8px;">${escapeHTML(label)}</div>
-      <div style="font-size:24px;font-weight:800;overflow-wrap:anywhere;">${escapeHTML(value || "Não informado")}</div>
-    </div>
-  `
+app.innerHTML = `
+
+<div class="container fade">
+
+<div style="
+display:flex;
+justify-content:space-between;
+gap:20px;
+flex-wrap:wrap;
+margin-bottom:28px;
+">
+
+<div>
+
+<h1 style="
+font-size:58px;
+margin-bottom:12px;
+">
+Tutor Evolutivo AI
+</h1>
+
+<p style="
+font-size:18px;
+color:var(--muted);
+">
+
+Sistema emocional de aprendizado adaptativo.
+
+</p>
+
+</div>
+
+<div style="
+display:flex;
+gap:12px;
+flex-wrap:wrap;
+align-items:center;
+">
+
+<div class="level">
+🔥 ${state.streak} dias
+</div>
+
+<div class="level">
+⭐ ${state.xp} XP
+</div>
+
+<div class="level">
+🏆 ${state.level}
+</div>
+
+</div>
+
+</div>
+
+<div class="grid grid-3"
+style="margin-bottom:20px;">
+
+<div class="glass card">
+
+<div style="
+color:var(--muted);
+margin-bottom:8px;
+">
+Objetivo
+</div>
+
+<div style="
+font-size:24px;
+font-weight:700;
+">
+${user.goal}
+</div>
+
+</div>
+
+<div class="glass card">
+
+<div style="
+color:var(--muted);
+margin-bottom:8px;
+">
+Melhor horário
+</div>
+
+<div style="
+font-size:24px;
+font-weight:700;
+">
+${user.bestTime}
+</div>
+
+</div>
+
+<div class="glass card">
+
+<div style="
+color:var(--muted);
+margin-bottom:8px;
+">
+Maior dificuldade
+</div>
+
+<div style="
+font-size:24px;
+font-weight:700;
+">
+${user.difficulty}
+</div>
+
+</div>
+
+</div>
+
+<div class="grid grid-2">
+
+<div class="glass card">
+
+<h2 style="
+font-size:32px;
+margin-bottom:24px;
+">
+Roadmap Inteligente
+</h2>
+
+${state.plan.roadmap.map(item=>`
+
+<div class="roadmap-item">
+
+<span>
+
+${
+item.status==="done"
+? "✅"
+: item.status==="active"
+? "⏳"
+: "🔒"
 }
 
-function renderRoadmapItem(item){
-  const icon = item.status === "done" ? "✅" : item.status === "active" ? "⏳" : "🔒"
+${item.title}
 
-  return `
-    <div class="roadmap-item">
-      <span class="roadmap-title">${icon} ${escapeHTML(item.title)}</span>
-      <span>${Math.round(item.percent)}%</span>
-    </div>
-  `
+</span>
+
+<span>
+${item.percent}%
+</span>
+
+</div>
+
+`).join("")}
+
+<div class="lesson-box"
+style="margin-top:20px;">
+
+🧠 A IA percebeu que você aprende melhor usando:
+<strong>${user.learningStyle}</strong>
+
+</div>
+
+</div>
+
+<div style="
+display:flex;
+flex-direction:column;
+gap:18px;
+">
+
+<div class="glass card">
+
+<h2 style="
+font-size:28px;
+margin-bottom:18px;
+">
+📚 Materiais Inteligentes
+</h2>
+
+<p style="
+color:var(--muted);
+line-height:1.7;
+margin-bottom:20px;
+">
+
+A IA adapta o formato ideal para você.
+
+</p>
+
+<div style="
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:12px;
+">
+
+<button
+class="btn btn-soft"
+onclick="generateMaterial('pdf')"
+style="
+padding:16px;
+border-radius:18px;
+">
+
+📄 PDF
+
+</button>
+
+<button
+class="btn btn-soft"
+onclick="generateMaterial('podcast')"
+style="
+padding:16px;
+border-radius:18px;
+">
+
+🎙️ Podcast
+
+</button>
+
+<button
+class="btn btn-soft"
+onclick="generateMaterial('flashcards')"
+style="
+padding:16px;
+border-radius:18px;
+">
+
+🧠 Flashcards
+
+</button>
+
+<button
+class="btn btn-soft"
+onclick="generateMaterial('quiz')"
+style="
+padding:16px;
+border-radius:18px;
+">
+
+❓ Quiz
+
+</button>
+
+</div>
+
+</div>
+
+<div class="glass card">
+
+<h2 style="
+font-size:28px;
+margin-bottom:18px;
+">
+🚨 Sistema Anti-Abandono
+</h2>
+
+<p style="
+line-height:1.8;
+color:var(--muted);
+margin-bottom:18px;
+">
+
+O tutor detecta:
+- procrastinação,
+- queda de energia,
+- desânimo,
+- dificuldade.
+
+</p>
+
+<button
+class="btn btn-primary"
+onclick="simulateDropout()"
+style="
+width:100%;
+padding:16px;
+border-radius:18px;
+">
+
+Ativar Simulação →
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="glass card"
+style="margin-top:22px;">
+
+<div style="
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:24px;
+">
+
+<h2 style="
+font-size:32px;
+">
+🤖 Tutor Inteligente
+</h2>
+
+<div class="level">
+Memória Emocional Ativa
+</div>
+
+</div>
+
+<div
+id="chat"
+class="chat">
+
+${renderChatHistory()}
+
+</div>
+
+<div style="
+display:flex;
+gap:12px;
+margin-top:18px;
+">
+
+<input
+id="chatInput"
+class="input"
+placeholder="Pergunte algo ao tutor..."
+onkeypress="if(event.key==='Enter')sendMessage()"
+/>
+
+<button
+class="btn btn-primary"
+onclick="sendMessage()"
+style="
+padding:0 28px;
+border-radius:18px;
+">
+
+→
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+`
+
+scrollChat()
+
 }
 
 function renderChatHistory(){
-  return state.chatHistory.map(msg => `
-    <div class="bubble ${msg.role === "user" ? "user" : "ai"} fade">
-      ${textToHTML(msg.content)}
-    </div>
-  `).join("")
+
+return state.chatHistory.map(msg=>`
+
+<div class="bubble ${
+msg.role === "user"
+? "user"
+: "ai"
+} fade">
+
+${msg.content}
+
+</div>
+
+`).join("")
+
 }
 
 function sendMessage(){
-  const input = document.getElementById("chatInput")
-  const value = input.value.trim()
 
-  if(!value) return
+const input =
+document.getElementById("chatInput")
 
-  state.chatHistory.push({ role:"user", content:value })
-  state.chatHistory.push({ role:"assistant", content:generateReply(value) })
-  save()
+const value =
+input.value.trim()
 
-  renderDashboard()
+if(!value)return
+
+state.chatHistory.push({
+
+role:"user",
+content:value
+
+})
+
+const reply = generateReply(value)
+
+state.chatHistory.push({
+
+role:"assistant",
+content:reply
+
+})
+
+save()
+
+renderDashboard()
+
 }
 
 function generateReply(message){
-  const user = state.userData
-  const lower = message.toLowerCase()
 
-  if(lower.includes("desmotivado") || lower.includes("sem vontade")){
-    return `Tudo bem desacelerar.
-Vou reduzir sua carga mental hoje e adaptar seu estudo para uma sessão leve de 10 minutos.`
-  }
+const user = state.userData
 
-  if(lower.includes("cansado") || lower.includes("exausto")){
-    return `Você não precisa estudar pesado hoje.
-Vou transformar o próximo conteúdo em formato mais leve: podcast, resumo rápido ou revisão visual.`
-  }
+const lower =
+message.toLowerCase()
 
-  if(lower.includes("procrast")){
-    return `A procrastinação normalmente aparece quando o cérebro percebe excesso de esforço.
-Vamos quebrar isso em uma primeira ação de 2 minutos. Depois você decide se continua.`
-  }
+if(lower.includes("desmotivado")){
 
-  if(lower.includes("difícil") || lower.includes("dificil")){
-    return `Se parece difícil, vamos reduzir a abstração.
-Vou explicar usando exemplo prático, depois resumo e só então exercício.`
-  }
+return `
+Tudo bem desacelerar.
 
-  return `Entendi.
-Como seu objetivo é: ${user.goal},
-vou continuar adaptando intensidade, ritmo e formato de conteúdo.
+Vou reduzir sua carga mental hoje e adaptar seu estudo para sessões leves de 10 minutos.
+`
 
-${motivationalLines[Math.floor(Math.random() * motivationalLines.length)]}`
+}
+
+if(lower.includes("cansado")){
+
+return `
+Você não precisa estudar pesado hoje.
+
+Vou transformar o próximo conteúdo em formato mais leve:
+- podcast,
+- resumo rápido,
+- micro aprendizado.
+`
+
+}
+
+if(lower.includes("procrast")){
+
+return `
+A procrastinação normalmente aparece quando o cérebro percebe excesso de esforço.
+
+Vamos quebrar isso em pequenas vitórias rápidas.
+`
+
+}
+
+return `
+Entendi.
+
+Como seu objetivo é:
+${user.goal},
+
+vou continuar adaptando:
+- intensidade,
+- ritmo,
+- profundidade,
+- formato de conteúdo.
+
+`
+
 }
 
 function generateMaterial(type){
-  const data = {
-    pdf:{
-      title:"PDF Inteligente",
-      text:"Resumo estruturado com conceitos principais, exemplo prático e plano de revisão."
-    },
-    podcast:{
-      title:"Podcast Inteligente",
-      text:"Roteiro leve para aprender enquanto caminha, dirige ou descansa."
-    },
-    flashcards:{
-      title:"Flashcards Inteligentes",
-      text:"Perguntas rápidas para revisão ativa e memorização com baixo esforço."
-    },
-    quiz:{
-      title:"Quiz Inteligente",
-      text:"Perguntas curtas para testar entendimento e reforçar os pontos fracos."
-    }
-  }
 
-  const material = data[type]
+showModal(`
 
-  showModal(`
-    <div style="text-align:center;">
-      <h2 style="font-size:36px;margin-bottom:18px;">${escapeHTML(material.title)}</h2>
-      <div class="lesson-box" style="margin-bottom:24px;">
-        ${escapeHTML(material.text)}
-        <br><br>
-        Adaptado para: <strong>${escapeHTML(state.userData.learningStyle || "seu estilo de aprendizado")}</strong>.
-      </div>
-      <button class="btn btn-primary" onclick="completeLesson()" style="width:100%;padding:18px;border-radius:18px;">
-        Concluir material (+50 XP)
-      </button>
-    </div>
-  `)
+<div style="text-align:center;">
+
+<div style="
+font-size:64px;
+margin-bottom:20px;
+">
+
+${
+type === "pdf"
+? "📄"
+: type === "podcast"
+? "🎙️"
+: type === "flashcards"
+? "🧠"
+: "❓"
 }
 
-function completeLesson(){
-  state.xp += 50
-  state.streak += 1
-  state.completedLessons += 1
+</div>
 
-  const active = state.plan.roadmap.find(item => item.status === "active")
-  if(active) active.percent = Math.min(100, active.percent + 15)
+<h2 style="
+font-size:36px;
+margin-bottom:18px;
+">
 
-  if(state.xp >= 300) state.level = "Avançando"
-  if(state.xp >= 500) state.level = "Imparável"
+${
+type === "pdf"
+? "PDF Inteligente"
+: type === "podcast"
+? "Podcast Inteligente"
+: type === "flashcards"
+? "Flashcards Inteligentes"
+: "Quiz Inteligente"
+}
 
-  save()
-  closeModal()
-  showToast("Atividade concluída. +50 XP adicionados.")
-  renderDashboard()
+</h2>
+
+<div class="lesson-box"
+style="margin-bottom:24px;">
+
+A IA criou um material adaptado:
+- ao seu tempo,
+- ao seu estilo de aprendizado,
+- ao seu nível atual.
+
+</div>
+
+<button
+class="btn btn-primary"
+onclick="closeModal()"
+style="
+width:100%;
+padding:18px;
+border-radius:18px;
+">
+
+Continuar
+
+</button>
+
+</div>
+
+`)
+
 }
 
 function simulateDropout(){
-  showModal(`
-    <div>
-      <h2 style="font-size:32px;margin-bottom:18px;">Detectamos uma pausa</h2>
-      <p style="line-height:1.8;color:var(--muted);margin-bottom:20px;">
-        O que mais dificultou sua continuidade?
-      </p>
 
-      <div style="display:flex;flex-direction:column;gap:12px;">
-        <button class="btn btn-soft" style="padding:16px;border-radius:16px;justify-content:flex-start;" onclick="dropoutReason('tempo')">Falta de tempo</button>
-        <button class="btn btn-soft" style="padding:16px;border-radius:16px;justify-content:flex-start;" onclick="dropoutReason('dificuldade')">Conteúdo difícil</button>
-        <button class="btn btn-soft" style="padding:16px;border-radius:16px;justify-content:flex-start;" onclick="dropoutReason('desmotivacao')">Desmotivação</button>
-        <button class="btn btn-soft" style="padding:16px;border-radius:16px;justify-content:flex-start;" onclick="dropoutReason('cansaco')">Cansaço mental</button>
-      </div>
-    </div>
-  `)
+showModal(`
+
+<div>
+
+<h2 style="
+font-size:32px;
+margin-bottom:18px;
+">
+🚨 Detectamos uma pausa
+</h2>
+
+<p style="
+line-height:1.8;
+color:var(--muted);
+margin-bottom:20px;
+">
+
+O que mais dificultou sua continuidade?
+
+</p>
+
+<div style="
+display:flex;
+flex-direction:column;
+gap:12px;
+">
+
+<button
+class="btn btn-soft"
+style="
+padding:16px;
+border-radius:16px;
+"
+onclick="dropoutReason('tempo')">
+
+⏰ Falta de tempo
+
+</button>
+
+<button
+class="btn btn-soft"
+style="
+padding:16px;
+border-radius:16px;
+"
+onclick="dropoutReason('dificuldade')">
+
+📚 Conteúdo difícil
+
+</button>
+
+<button
+class="btn btn-soft"
+style="
+padding:16px;
+border-radius:16px;
+"
+onclick="dropoutReason('desmotivacao')">
+
+😔 Desmotivação
+
+</button>
+
+<button
+class="btn btn-soft"
+style="
+padding:16px;
+border-radius:16px;
+"
+onclick="dropoutReason('cansaco')">
+
+😴 Cansaço mental
+
+</button>
+
+</div>
+
+</div>
+
+`)
+
 }
 
 function dropoutReason(reason){
-  const responses = {
-    tempo:"Vou reduzir suas sessões para micro aprendizado de 10 minutos.",
-    dificuldade:"Vou simplificar os próximos conteúdos usando resumos rápidos e exemplos práticos.",
-    desmotivacao:"Vamos recuperar sua evolução com pequenas vitórias rápidas.",
-    cansaco:"Vou transformar seus próximos conteúdos em formatos mais leves."
-  }
 
-  state.dropRisk = "médio"
-  save()
+const responses = {
 
-  showModal(`
-    <div style="text-align:center;">
-      <h2 style="font-size:34px;margin-bottom:18px;">Tutor Adaptado</h2>
-      <div class="lesson-box" style="margin-bottom:24px;">
-        ${escapeHTML(responses[reason])}
-      </div>
-      <button class="btn btn-primary" onclick="closeModal();renderDashboard()" style="width:100%;padding:18px;border-radius:18px;">
-        Continuar jornada
-      </button>
-    </div>
-  `)
+tempo:`
+Vou reduzir suas sessões para micro aprendizado de 10 minutos.
+`,
+
+dificuldade:`
+Vou simplificar os próximos conteúdos usando:
+- resumos rápidos,
+- exemplos práticos,
+- flashcards.
+`,
+
+desmotivacao:`
+Vamos recuperar sua evolução com pequenas vitórias rápidas.
+`,
+
+cansaco:`
+Vou transformar seus próximos conteúdos em formatos mais leves.
+`
+
 }
 
-function setEmotion(emotion){
-  state.emotion = emotion
-  state.emotionHistory.push({ emotion, date:new Date().toISOString() })
+showModal(`
 
-  if(emotion === "cansado" || emotion === "desmotivado"){
-    state.dropRisk = "médio"
-  }
+<div style="text-align:center;">
 
-  save()
-  showToast(`Estado emocional atualizado: ${emotion}.`)
-  renderDashboard()
+<div style="
+font-size:64px;
+margin-bottom:20px;
+">
+🧠
+</div>
+
+<h2 style="
+font-size:34px;
+margin-bottom:18px;
+">
+Tutor Adaptado
+</h2>
+
+<div class="lesson-box"
+style="margin-bottom:24px;">
+
+${responses[reason]}
+
+</div>
+
+<button
+class="btn btn-primary"
+onclick="closeModal()"
+style="
+width:100%;
+padding:18px;
+border-radius:18px;
+">
+
+Continuar Jornada
+
+</button>
+
+</div>
+
+`)
+
 }
 
 function scrollChat(){
-  const chat = document.getElementById("chat")
-  if(chat) chat.scrollTop = chat.scrollHeight
+
+const chat =
+document.getElementById("chat")
+
+if(chat){
+
+chat.scrollTop =
+chat.scrollHeight
+
+}
+
 }
 
 function showModal(content){
-  closeModal()
 
-  const modal = document.createElement("div")
-  modal.id = "modal"
-  modal.className = "modal fade"
-  modal.setAttribute("role", "dialog")
-  modal.setAttribute("aria-modal", "true")
-  modal.onclick = event => {
-    if(event.target === modal) closeModal()
-  }
+closeModal()
 
-  modal.innerHTML = `<div class="modal-box">${content}</div>`
-  document.body.appendChild(modal)
+const modal =
+document.createElement("div")
+
+modal.id = "modal"
+
+modal.className = "modal"
+
+modal.innerHTML = `
+
+<div class="modal-box fade">
+
+${content}
+
+</div>
+
+`
+
+document.body.appendChild(modal)
+
 }
 
 function closeModal(){
-  const modal = document.getElementById("modal")
-  if(modal) modal.remove()
+
+const modal =
+document.getElementById("modal")
+
+if(modal){
+
+modal.remove()
+
 }
 
-function resetApp(){
-  localStorage.removeItem(STORAGE_KEY)
-  currentQuestion = 0
-  state = defaultState()
-  renderLanding()
 }
 
-document.addEventListener("keydown", event => {
-  if(event.key === "Escape") closeModal()
-})
+renderLanding()
 
-if(state.plan) renderDashboard()
-else renderLanding()
 </script>
+
 </body>
 </html>
-```
