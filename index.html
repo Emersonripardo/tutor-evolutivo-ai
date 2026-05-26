@@ -664,47 +664,139 @@ function selectLearning(style) {
   `;
 }
 
-function sendMessage(event) {
-  event.preventDefault();
+async function sendMessage(event) {
 
-  const input = document.getElementById("chatInput");
-  const value = input.value.trim();
+event.preventDefault();
 
-  if (!value) return;
+const input =
+document.getElementById("chatInput");
 
-  const messages = document.getElementById("messages");
+const value =
+input.value.trim();
 
-  const userMessage = document.createElement("div");
-  userMessage.className = "message user fade-in";
-  userMessage.textContent = value;
-  messages.appendChild(userMessage);
+if (!value) return;
 
-  input.value = "";
-  messages.scrollTop = messages.scrollHeight;
+const messages =
+document.getElementById("messages");
 
-  const typingMessage = document.createElement("div");
-  typingMessage.className = "message ai fade-in";
-  typingMessage.innerHTML = `
-    <div class="typing-indicator">
-      <span></span>
-      <span></span>
-      <span></span>
-    </div>
-  `;
+const userMessage =
+document.createElement("div");
 
-  messages.appendChild(typingMessage);
-  messages.scrollTop = messages.scrollHeight;
+userMessage.className =
+"message user fade-in";
 
-  setTimeout(() => {
-    typingMessage.remove();
+userMessage.textContent =
+value;
 
-    const aiMessage = document.createElement("div");
-    aiMessage.className = "message ai fade-in";
-    aiMessage.innerHTML = generateAIResponse(value);
+messages.appendChild(userMessage);
 
-    messages.appendChild(aiMessage);
-    messages.scrollTop = messages.scrollHeight;
-  }, 1200);
+input.value = "";
+
+messages.scrollTop =
+messages.scrollHeight;
+
+const typingMessage =
+document.createElement("div");
+
+typingMessage.className =
+"message ai fade-in";
+
+typingMessage.innerHTML = `
+<div class="typing-indicator">
+<span></span>
+<span></span>
+<span></span>
+</div>
+`;
+
+messages.appendChild(
+typingMessage
+);
+
+messages.scrollTop =
+messages.scrollHeight;
+
+try {
+
+const aiResponse =
+await callOpenAI([
+
+{
+role:"system",
+
+content:`
+
+Você é um professor particular extremamente didático.
+
+Seu papel é:
+- ensinar,
+- simplificar assuntos difíceis,
+- usar analogias,
+- usar exemplos reais,
+- adaptar explicações,
+- detectar dificuldades,
+- recomendar vídeos,
+- recomendar PDFs,
+- criar exercícios,
+- ajudar o aluno a evoluir.
+
+O aluno aprende melhor com:
+${learningStyle}
+
+Você deve adaptar suas respostas para esse estilo.
+
+Nunca fale como suporte técnico.
+Fale como um professor humano inteligente.
+
+`
+},
+
+{
+role:"user",
+content:value
+}
+
+]);
+
+typingMessage.remove();
+
+const aiMessage =
+document.createElement("div");
+
+aiMessage.className =
+"message ai fade-in";
+
+aiMessage.innerHTML =
+aiResponse;
+
+messages.appendChild(
+aiMessage
+);
+
+messages.scrollTop =
+messages.scrollHeight;
+
+} catch(error){
+
+typingMessage.remove();
+
+const errorMessage =
+document.createElement("div");
+
+errorMessage.className =
+"message ai fade-in";
+
+errorMessage.innerHTML = `
+Desculpe.
+Ocorreu um erro ao conectar com a IA.
+`;
+
+messages.appendChild(
+errorMessage
+);
+
+}
+
 }
 
 function generateAIResponse(question) {
@@ -814,6 +906,8 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 </script>
+
+<script src="js/ai.js"></script>
 
 </body>
 </html>
