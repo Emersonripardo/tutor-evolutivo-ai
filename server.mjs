@@ -6,7 +6,6 @@ import path from "path"
 
 dotenv.config()
 
-// ======================================================
 // VALIDAÇÃO DE VARIÁVEIS
 // ======================================================
 
@@ -358,18 +357,17 @@ REGRAS:
 
     )
 
-    const data =
-    await response.json()
+   const data =
+await response.json()
 
-    console.log(
+console.log("===== GEMINI RESPONSE =====")
 
-      JSON.stringify(
-        data,
-        null,
-        2
-      )
+console.log(
+  JSON.stringify(data,null,2)
+)
 
-    )
+console.log("===========================")
+
 
     // ==========================
     // ERRO GEMINI
