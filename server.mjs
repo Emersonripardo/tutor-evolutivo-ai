@@ -6,6 +6,7 @@ import path from "path"
 
 dotenv.config()
 
+// ======================================================
 // VALIDAÇÃO DE VARIÁVEIS
 // ======================================================
 
@@ -115,7 +116,10 @@ function rateLimit(req,res,next){
 
 }
 
-// limpa memória
+// ======================================================
+// LIMPA MEMÓRIA RATE LIMIT
+// ======================================================
+
 setInterval(()=>{
 
   const now = Date.now()
@@ -205,6 +209,311 @@ async function fetchWithTimeout(
 }
 
 // ======================================================
+// BANCO DE DADOS EM MEMÓRIA (HACKATHON)
+// ======================================================
+
+const hackathonUsers = []
+
+// ======================================================
+// REGISTRO
+// ======================================================
+
+app.post("/auth/register",rateLimit,async(req,res)=>{
+
+  try{
+
+    const {
+
+      name,
+      email,
+      pass
+
+    } = req.body
+
+    if(
+
+      !name
+      ||
+      !email
+      ||
+      !pass
+
+    ){
+
+      return res.status(400).json({
+
+        error:"Preencha todos os campos."
+
+      })
+
+    }
+
+    const emailNormal =
+    email
+      .trim()
+      .toLowerCase()
+
+    const exists =
+    hackathonUsers.find(
+
+      u=>
+      u.email === emailNormal
+
+    )
+
+    if(exists){
+
+      return res.status(400).json({
+
+        error:"Este email já está cadastrado."
+
+      })
+
+    }
+
+    const newUser = {
+
+      id:Date.now(),
+
+      name:
+      name.trim(),
+
+      first_name:
+      name.trim().split(" ")[0],
+
+      email:emailNormal
+
+    }
+
+    hackathonUsers.push({
+
+      ...newUser,
+
+      pass
+
+    })
+
+    console.log(
+
+      `[NOVO USUÁRIO] ${newUser.name}`
+
+    )
+
+    return res.json({
+
+      data:{
+
+        key:
+        CEFIS_API_KEY
+        ||
+        "chave_mockada_hackathon",
+
+        user:newUser
+
+      }
+
+    })
+
+  }catch(error){
+
+    console.error(
+
+      "[REGISTER ERROR]",
+      error
+
+    )
+
+    return res.status(500).json({
+
+      error:"Erro no registro"
+
+    })
+
+  }
+
+})
+
+// ======================================================
+// LOGIN
+// ======================================================
+
+app.post("/auth/login",rateLimit,async(req,res)=>{
+
+  try{
+
+    const {
+
+      email,
+      pass
+
+    } = req.body
+
+    if(
+
+      !email
+      ||
+      !pass
+
+    ){
+
+      return res.status(400).json({
+
+        error:
+        "Campos obrigatórios."
+
+      })
+
+    }
+
+    const emailNormal =
+    email
+      .trim()
+      .toLowerCase()
+
+    // ==================================================
+    // LOGIN CEFIS
+    // ==================================================
+
+    try{
+
+      const upstream =
+      await fetchWithTimeout(
+
+        "https://cefis.com.br/api/v1/login",
+
+        {
+
+          method:"POST",
+
+          headers:{
+
+            "Content-Type":
+            "application/json",
+
+            Accept:
+            "application/json"
+
+          },
+
+          body:JSON.stringify({
+
+            email:emailNormal,
+
+            pass
+
+          })
+
+        }
+
+      )
+
+      const data =
+      await upstream.json()
+
+      console.log(
+        "[CEFIS LOGIN]",
+        data
+      )
+
+      if(
+
+        upstream.ok
+        &&
+        !data.error
+
+      ){
+
+        return res.json(data)
+
+      }
+
+    }catch(err){
+
+      console.error(
+
+        "[CEFIS LOGIN ERROR]",
+
+        err.message
+
+      )
+
+    }
+
+    // ==================================================
+    // FALLBACK MOCK
+    // ==================================================
+
+    const mockUser =
+    hackathonUsers.find(
+
+      u=>
+
+        u.email === emailNormal
+        &&
+        u.pass === pass
+
+    )
+
+    if(mockUser){
+
+      return res.json({
+
+        data:{
+
+          key:
+          CEFIS_API_KEY
+          ||
+          "chave_mockada_hackathon",
+
+          user:{
+
+            id:
+            mockUser.id,
+
+            name:
+            mockUser.name,
+
+            first_name:
+            mockUser.first_name,
+
+            email:
+            mockUser.email
+
+          }
+
+        }
+
+      })
+
+    }
+
+    return res.status(401).json({
+
+      error:
+      "Credenciais inválidas."
+
+    })
+
+  }catch(error){
+
+    console.error(
+
+      "[LOGIN ERROR]",
+      error
+
+    )
+
+    return res.status(500).json({
+
+      error:"Erro login"
+
+    })
+
+  }
+
+})
+
+// ======================================================
 // CHAT GEMINI
 // ======================================================
 
@@ -214,10 +523,6 @@ app.post("/chat",rateLimit,async(req,res)=>{
 
     const { messages } =
     req.body
-
-    // ==========================
-    // VALIDAÇÃO
-    // ==========================
 
     if(
 
@@ -256,10 +561,6 @@ app.post("/chat",rateLimit,async(req,res)=>{
 
     }
 
-    // ==========================
-    // HISTÓRICO
-    // ==========================
-
     const contents =
     messages.map(m=>({
 
@@ -280,10 +581,6 @@ app.post("/chat",rateLimit,async(req,res)=>{
     messages[messages.length - 1]
     ?.content || ""
 
-    // ==========================
-    // LIMITE TEXTO
-    // ==========================
-
     if(lastMessage.length > 4000){
 
       return res.status(400).json({
@@ -293,10 +590,6 @@ app.post("/chat",rateLimit,async(req,res)=>{
       })
 
     }
-
-    // ==========================
-    // CHAMADA GEMINI
-    // ==========================
 
     const response =
     await fetchWithTimeout(
@@ -320,27 +613,26 @@ app.post("/chat",rateLimit,async(req,res)=>{
               {
                 text:`
 
-Você é um tutor educacional de elite.
+Você é Professor AI.
 
-OBJETIVOS:
+Especialista em:
+- educação
+- produtividade
+- concursos
+- aprendizado acelerado
 
+Seu objetivo:
 - ensinar profundamente
 - explicar simples
 - usar analogias
-- ensinar passo a passo
 - agir como professor humano
-- adaptar explicações
-- usar exemplos reais
 - incentivar o aluno
 
-REGRAS:
-
-- nunca responda curto
+Sempre:
 - use markdown
 - explique detalhadamente
 - use listas
-- incentive prática
-- recomende exercícios
+- ensine passo a passo
 
 `
               }
@@ -357,21 +649,16 @@ REGRAS:
 
     )
 
-   const data =
-await response.json()
+    const data =
+    await response.json()
 
-console.log("===== GEMINI RESPONSE =====")
+    console.log("===== GEMINI RESPONSE =====")
 
-console.log(
-  JSON.stringify(data,null,2)
-)
+    console.log(
+      JSON.stringify(data,null,2)
+    )
 
-console.log("===========================")
-
-
-    // ==========================
-    // ERRO GEMINI
-    // ==========================
+    console.log("===========================")
 
     if(data.error){
 
@@ -385,10 +672,6 @@ console.log("===========================")
       })
 
     }
-
-    // ==========================
-    // RESPOSTA
-    // ==========================
 
     const text =
 
@@ -433,7 +716,7 @@ console.log("===========================")
 })
 
 // ======================================================
-// CURSOS CEFIS
+// CURSOS
 // ======================================================
 
 app.get("/courses",rateLimit,async(req,res)=>{
@@ -478,6 +761,51 @@ app.get("/courses",rateLimit,async(req,res)=>{
     })
 
   }
+
+})
+
+// ======================================================
+// TRACKS MOCK
+// ======================================================
+
+app.get("/tracks",(req,res)=>{
+
+  return res.json({
+
+    data:[
+
+      {
+        id:1,
+        title:"IA e Produtividade"
+      },
+
+      {
+        id:2,
+        title:"Desenvolvimento Web"
+      },
+
+      {
+        id:3,
+        title:"Marketing Digital"
+      }
+
+    ]
+
+  })
+
+})
+
+// ======================================================
+// CERTIFICADOS MOCK
+// ======================================================
+
+app.get("/certs",(req,res)=>{
+
+  return res.json({
+
+    data:[]
+
+  })
 
 })
 
