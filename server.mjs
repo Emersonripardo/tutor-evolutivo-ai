@@ -51,7 +51,7 @@ app.post("/chat", async (req,res)=>{
 
         body:JSON.stringify({
 
-          model:"grok-3-mini",
+          model:"grok-beta",
 
           messages,
 
