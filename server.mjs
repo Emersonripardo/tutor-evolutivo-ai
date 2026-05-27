@@ -65,7 +65,21 @@ app.post("/chat", async (req,res)=>{
     const data =
     await response.json()
 
-    console.log(data)
+    console.log(
+      JSON.stringify(data,null,2)
+    )
+
+    if(data.error){
+
+      console.error(data.error)
+
+      return res.status(500).json({
+
+        error:data.error.message
+
+      })
+
+    }
 
     res.json(data)
 
