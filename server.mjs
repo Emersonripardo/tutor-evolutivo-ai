@@ -6,279 +6,523 @@ import path from "path"
 
 dotenv.config()
 
-// ================================================
-// VALIDAÇÃO DE VARIÁVEIS DE AMBIENTE NO BOOT
-// ================================================
+// ======================================================
+// VALIDAÇÃO DE VARIÁVEIS
+// ======================================================
+
 const REQUIRED_ENV = ["GEMINI_API_KEY"]
-const missing = REQUIRED_ENV.filter(k => !process.env[k])
-if (missing.length) {
-  console.error(`[ERRO] Variáveis de ambiente faltando: ${missing.join(", ")}`)
+
+const missing = REQUIRED_ENV.filter(
+  key => !process.env[key]
+)
+
+if(missing.length){
+
+  console.error(
+    `❌ Variáveis faltando: ${missing.join(", ")}`
+  )
+
   process.exit(1)
+
 }
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY
-const PORT           = process.env.PORT || 3000
-const CEFIS_API_KEY  = process.env.CEFIS_API_KEY || "" // opcional — algumas rotas exigem auth
+const GEMINI_API_KEY =
+process.env.GEMINI_API_KEY
+
+const PORT =
+process.env.PORT || 3000
+
+const CEFIS_API_KEY =
+process.env.CEFIS_API_KEY || ""
+
+// ======================================================
+// APP
+// ======================================================
 
 const app = express()
 
-// ================================================
-// MIDDLEWARES GLOBAIS
-// ================================================
+// ======================================================
+// MIDDLEWARES
+// ======================================================
+
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGIN || "*",
-  methods: ["GET", "POST"],
+
+  origin:
+  process.env.ALLOWED_ORIGIN || "*"
+
 }))
 
-app.use(express.json({ limit: "32kb" })) // evita payloads gigantes
+app.use(express.json({
 
-// ------------------------------------------------
-// Rate limiting simples (sem dependência externa)
-// Limita cada IP a MAX_REQUESTS por janela de tempo
-// ------------------------------------------------
-const RATE_WINDOW_MS  = 60_000 // 1 minuto
-const MAX_REQUESTS    = 30     // por IP por janela
-const rateLimitStore  = new Map()
+  limit:"32kb"
 
-function rateLimit(req, res, next) {
-  const ip  = req.ip || req.socket.remoteAddress || "unknown"
-  const now = Date.now()
-  const entry = rateLimitStore.get(ip)
+}))
 
-  if (!entry || now - entry.start > RATE_WINDOW_MS) {
-    rateLimitStore.set(ip, { count: 1, start: now })
+// ======================================================
+// RATE LIMIT
+// ======================================================
+
+const requests = new Map()
+
+const WINDOW_MS = 60000
+const MAX_REQUESTS = 30
+
+function rateLimit(req,res,next){
+
+  const ip =
+  req.ip || "unknown"
+
+  const now =
+  Date.now()
+
+  const userData =
+  requests.get(ip)
+
+  if(!userData){
+
+    requests.set(ip,{
+      count:1,
+      start:now
+    })
+
     return next()
+
   }
 
-  entry.count++
-  if (entry.count > MAX_REQUESTS) {
-    return res.status(429).json({ error: "Muitas requisições. Aguarde um momento." })
+  if(now - userData.start > WINDOW_MS){
+
+    requests.set(ip,{
+      count:1,
+      start:now
+    })
+
+    return next()
+
+  }
+
+  userData.count++
+
+  if(userData.count > MAX_REQUESTS){
+
+    return res.status(429).json({
+
+      error:"Muitas requisições. Aguarde."
+
+    })
+
   }
 
   next()
+
 }
 
-// Limpa o store periodicamente para não vazar memória
-setInterval(() => {
-  const cutoff = Date.now() - RATE_WINDOW_MS
-  for (const [ip, entry] of rateLimitStore) {
-    if (entry.start < cutoff) rateLimitStore.delete(ip)
-  }
-}, RATE_WINDOW_MS)
+// limpa memória
+setInterval(()=>{
 
-// ================================================
-// FRONTEND ESTÁTICO
-// ================================================
+  const now = Date.now()
+
+  for(const [ip,data] of requests){
+
+    if(now - data.start > WINDOW_MS){
+
+      requests.delete(ip)
+
+    }
+
+  }
+
+},WINDOW_MS)
+
+// ======================================================
+// FRONTEND
+// ======================================================
+
 app.use(express.static("."))
 
-app.get("/", (req, res) => {
-  res.sendFile(path.resolve("index.html"))
+app.get("/",(req,res)=>{
+
+  res.sendFile(
+    path.resolve("index.html")
+  )
+
 })
 
-// ================================================
-// HELPER: fetch com timeout
-// ================================================
-async function fetchWithTimeout(url, options = {}, timeoutMs = 15_000) {
-  const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), timeoutMs)
-  try {
-    const res = await fetch(url, { ...options, signal: controller.signal })
-    return res
-  } finally {
-    clearTimeout(timer)
-  }
-}
+// ======================================================
+// HEALTH CHECK
+// ======================================================
 
-// ================================================
-// ROTA: POST /chat — Proxy seguro para Gemini
-// ================================================
-app.post("/chat", rateLimit, async (req, res) => {
-  const { messages } = req.body
+app.get("/health",(req,res)=>{
 
-  // ---- Validação de input ----
-  if (!Array.isArray(messages) || messages.length === 0) {
-    return res.status(400).json({ error: "Campo 'messages' deve ser um array não-vazio." })
-  }
+  res.json({
 
-  // Valida que cada item tem role e content string
-  const invalid = messages.some(
-    m => typeof m?.role !== "string" || typeof m?.content !== "string" || m.content.trim() === ""
-  )
-  if (invalid) {
-    return res.status(400).json({ error: "Cada mensagem deve ter 'role' e 'content' (string não-vazia)." })
-  }
+    status:"online"
 
-  // ---- Monta histórico completo para o Gemini ----
-  // Gemini usa "user" e "model" como roles
-  const contents = messages.map(m => ({
-    role: m.role === "assistant" ? "model" : "user",
-    parts: [{ text: m.content }],
-  }))
+  })
 
-  try {
-    const geminiRes = await fetchWithTimeout(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents }),
-      }
-    )
+})
 
-    const data = await geminiRes.json()
+// ======================================================
+// FETCH COM TIMEOUT
+// ======================================================
 
-    if (data.error) {
-      console.error("[Gemini Error]", data.error)
-      return res.status(502).json({ error: "Erro na API Gemini: " + (data.error.message || "desconhecido") })
-    }
+async function fetchWithTimeout(
 
-    const text =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "Não consegui gerar uma resposta."
+  url,
+  options = {},
+  timeout = 15000
 
-    // Retorna no mesmo formato OpenAI-like que o frontend espera
-    return res.json({
-      choices: [{ message: { role: "assistant", content: text } }],
+){
+
+  const controller =
+  new AbortController()
+
+  const timer =
+  setTimeout(()=>{
+
+    controller.abort()
+
+  },timeout)
+
+  try{
+
+    const response =
+    await fetch(url,{
+
+      ...options,
+
+      signal:
+      controller.signal
+
     })
 
-  } catch (err) {
-    if (err.name === "AbortError") {
-      console.error("[Gemini Timeout]")
-      return res.status(504).json({ error: "Timeout ao contatar a Gemini API." })
-    }
-    console.error("[Chat Error]", err)
-    return res.status(500).json({ error: "Erro interno no servidor." })
-  }
-})
+    return response
 
-// ================================================
-// ROTA: GET /courses — Proxy autenticado para CEFIS
-// ================================================
-app.get("/courses", rateLimit, async (req, res) => {
-  // Repassa query params legítimos vindos do frontend
-  const allowed = ["count", "page", "order", "orderDirection", "search", "categories", "filter"]
-  const params  = new URLSearchParams()
+  }finally{
 
-  for (const key of allowed) {
-    const val = req.query[key]
-    if (val !== undefined) params.set(key, val)
+    clearTimeout(timer)
+
   }
 
-  const url = `https://api-v3.cefis.com.br/courses?${params}`
+}
 
-  const headers = { Accept: "application/json" }
-  if (CEFIS_API_KEY) headers["Authorization"] = `Bearer ${CEFIS_API_KEY}`
+// ======================================================
+// CHAT GEMINI
+// ======================================================
 
-  try {
-    const upstream = await fetchWithTimeout(url, { headers })
+app.post("/chat",rateLimit,async(req,res)=>{
 
-    if (!upstream.ok) {
-      return res.status(upstream.status).json({ error: `CEFIS retornou status ${upstream.status}` })
-    }
+  try{
 
-    const data = await upstream.json()
-    return res.json(data)
+    const { messages } =
+    req.body
 
-  } catch (err) {
-    if (err.name === "AbortError") {
-      return res.status(504).json({ error: "Timeout ao buscar cursos CEFIS." })
-    }
-    console.error("[Courses Error]", err)
-    return res.status(500).json({ error: "Erro ao buscar cursos." })
-  }
-})
+    // ==========================
+    // VALIDAÇÃO
+    // ==========================
 
-// ================================================
-// ROTA: GET /tracks — Trilhas CEFIS
-// ================================================
-app.get("/tracks", rateLimit, async (req, res) => {
-  const allowed = ["count", "page", "categories", "filters"]
-  const params  = new URLSearchParams()
+    if(
 
-  for (const key of allowed) {
-    const val = req.query[key]
-    if (val !== undefined) params.set(key, val)
-  }
+      !Array.isArray(messages)
+      ||
+      messages.length === 0
 
-  const url = `https://api-v3.cefis.com.br/tracks?${params}`
-  const headers = { Accept: "application/json" }
-  if (CEFIS_API_KEY) headers["Authorization"] = `Bearer ${CEFIS_API_KEY}`
+    ){
 
-  try {
-    const upstream = await fetchWithTimeout(url, { headers })
+      return res.status(400).json({
 
-    if (!upstream.ok) {
-      return res.status(upstream.status).json({ error: `CEFIS retornou status ${upstream.status}` })
+        error:"Messages inválido"
+
+      })
+
     }
 
-    return res.json(await upstream.json())
+    const invalid =
+    messages.some(
 
-  } catch (err) {
-    if (err.name === "AbortError") return res.status(504).json({ error: "Timeout ao buscar trilhas." })
-    console.error("[Tracks Error]", err)
-    return res.status(500).json({ error: "Erro ao buscar trilhas." })
-  }
-})
+      m=>
 
-// ================================================
-// ROTA: POST /auth/login — Proxy de login CEFIS
-// A API key nunca trafega pelo frontend
-// ================================================
-app.post("/auth/login", rateLimit, async (req, res) => {
-  const { email, pass } = req.body
+      typeof m?.role !== "string"
+      ||
+      typeof m?.content !== "string"
 
-  if (!email || !pass || typeof email !== "string" || typeof pass !== "string") {
-    return res.status(400).json({ error: "Campos 'email' e 'pass' são obrigatórios." })
-  }
-
-  try {
-    const upstream = await fetchWithTimeout(
-      "https://cefis.com.br/api/v1/login",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({ email: email.trim().toLowerCase(), pass }),
-      }
     )
 
-    const data = await upstream.json()
+    if(invalid){
 
-    if (!upstream.ok || data.error) {
-      return res.status(upstream.status || 401).json({ error: data?.message || "Credenciais inválidas." })
+      return res.status(400).json({
+
+        error:"Formato inválido"
+
+      })
+
     }
 
-    // Guarda a key no servidor (opcional: use Redis/DB em produção)
-    // Por ora, repassa ao frontend apenas os dados do usuário
-    // A key fica no backend se você quiser zero-exposure — aqui repassamos
-    // para manter compatibilidade com o fluxo atual do frontend.
+    // ==========================
+    // HISTÓRICO
+    // ==========================
+
+    const contents =
+    messages.map(m=>({
+
+      role:
+      m.role === "assistant"
+      ? "model"
+      : "user",
+
+      parts:[
+        {
+          text:m.content
+        }
+      ]
+
+    }))
+
+    const lastMessage =
+    messages[messages.length - 1]
+    ?.content || ""
+
+    // ==========================
+    // LIMITE TEXTO
+    // ==========================
+
+    if(lastMessage.length > 4000){
+
+      return res.status(400).json({
+
+        error:"Mensagem muito grande."
+
+      })
+
+    }
+
+    // ==========================
+    // CHAMADA GEMINI
+    // ==========================
+
+    const response =
+    await fetchWithTimeout(
+
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+
+      {
+
+        method:"POST",
+
+        headers:{
+          "Content-Type":"application/json"
+        },
+
+        body:JSON.stringify({
+
+          systemInstruction:{
+
+            parts:[
+
+              {
+                text:`
+
+Você é um tutor educacional de elite.
+
+OBJETIVOS:
+
+- ensinar profundamente
+- explicar simples
+- usar analogias
+- ensinar passo a passo
+- agir como professor humano
+- adaptar explicações
+- usar exemplos reais
+- incentivar o aluno
+
+REGRAS:
+
+- nunca responda curto
+- use markdown
+- explique detalhadamente
+- use listas
+- incentive prática
+- recomende exercícios
+
+`
+              }
+
+            ]
+
+          },
+
+          contents
+
+        })
+
+      }
+
+    )
+
+    const data =
+    await response.json()
+
+    console.log(
+
+      JSON.stringify(
+        data,
+        null,
+        2
+      )
+
+    )
+
+    // ==========================
+    // ERRO GEMINI
+    // ==========================
+
+    if(data.error){
+
+      console.error(data.error)
+
+      return res.status(500).json({
+
+        error:
+        data.error.message
+
+      })
+
+    }
+
+    // ==========================
+    // RESPOSTA
+    // ==========================
+
+    const text =
+
+      data?.candidates?.[0]
+      ?.content?.parts?.[0]
+      ?.text
+
+      ||
+
+      "Não consegui responder."
+
+    return res.json({
+
+      choices:[
+
+        {
+          message:{
+
+            role:"assistant",
+
+            content:text
+
+          }
+        }
+
+      ]
+
+    })
+
+  }catch(error){
+
+    console.error(error)
+
+    return res.status(500).json({
+
+      error:"Erro interno"
+
+    })
+
+  }
+
+})
+
+// ======================================================
+// CURSOS CEFIS
+// ======================================================
+
+app.get("/courses",rateLimit,async(req,res)=>{
+
+  try{
+
+    const headers = {
+
+      Accept:"application/json"
+
+    }
+
+    if(CEFIS_API_KEY){
+
+      headers["Authorization"] =
+      `Bearer ${CEFIS_API_KEY}`
+
+    }
+
+    const response =
+    await fetchWithTimeout(
+
+      "https://api-v3.cefis.com.br/courses",
+
+      { headers }
+
+    )
+
+    const data =
+    await response.json()
+
     return res.json(data)
 
-  } catch (err) {
-    if (err.name === "AbortError") return res.status(504).json({ error: "Timeout no login." })
-    console.error("[Login Error]", err)
-    return res.status(500).json({ error: "Erro ao autenticar." })
+  }catch(error){
+
+    console.error(error)
+
+    return res.status(500).json({
+
+      error:"Erro cursos"
+
+    })
+
   }
+
 })
 
-// ================================================
-// 404 HANDLER
-// ================================================
-app.use((req, res) => {
-  res.status(404).json({ error: "Rota não encontrada." })
+// ======================================================
+// 404
+// ======================================================
+
+app.use((req,res)=>{
+
+  res.status(404).json({
+
+    error:"Rota não encontrada"
+
+  })
+
 })
 
-// ================================================
-// GLOBAL ERROR HANDLER
-// ================================================
-app.use((err, req, res, next) => {
-  console.error("[Unhandled Error]", err)
-  res.status(500).json({ error: "Erro interno inesperado." })
+// ======================================================
+// ERROR HANDLER
+// ======================================================
+
+app.use((err,req,res,next)=>{
+
+  console.error(err)
+
+  res.status(500).json({
+
+    error:"Erro inesperado"
+
+  })
+
 })
 
-// ================================================
-// INICIALIZAÇÃO
-// ================================================
-app.listen(PORT, () => {
-  console.log(`✅ Servidor rodando em http://localhost:${PORT}`)
-  console.log(`   Gemini: configurado | CEFIS key: ${CEFIS_API_KEY ? "configurada" : "não configurada (rotas públicas)"}`)
+// ======================================================
+// SERVER
+// ======================================================
+
+app.listen(PORT,()=>{
+
+  console.log("================================")
+  console.log("🚀 Tutor Evolutivo Online")
+  console.log(`🌎 Porta: ${PORT}`)
+  console.log("🤖 Gemini conectado")
+  console.log("================================")
+
 })
