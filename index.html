@@ -515,10 +515,7 @@
 <div class="bg-mesh"></div>
 <div id="toast"></div>
 
-<!-- ══════════════════════════════════════════
-     LOGIN
-══════════════════════════════════════════ -->
-<div id="loginScreen" class="auth-screen fade-in">
+<div id="authScreen" class="auth-screen fade-in">
   <div class="auth-card glass">
     <div class="brand-logo">
       <div class="brand-icon">🧠</div>
@@ -527,29 +524,38 @@
         <div class="brand-tagline">Powered by CEFIS</div>
       </div>
     </div>
-    <div class="auth-title">Entre na sua conta.</div>
-    <div class="auth-sub">Use suas credenciais CEFIS para acessar o tutor inteligente.</div>
+    
+    <form id="loginForm" onsubmit="handleLogin(event)">
+      <div class="auth-title">Entre na sua conta.</div>
+      <div class="auth-sub">Use suas credenciais para acessar o tutor inteligente.</div>
+      <div id="loginAlert" class="alert"></div>
 
-    <div id="loginAlert" class="alert"></div>
-
-    <form onsubmit="handleLogin(event)">
       <div class="input-stack">
         <input type="email" class="input" id="loginEmail" placeholder="Seu email CEFIS" autocomplete="email" required/>
         <input type="password" class="input" id="loginPassword" placeholder="Sua senha" autocomplete="current-password" required/>
       </div>
       <button type="submit" class="btn btn-primary btn-full" id="loginBtn">Entrar na plataforma</button>
+      <button type="button" class="link-btn" onclick="toggleAuth('register')">Ainda não tenho conta. Criar conta</button>
     </form>
 
-    <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--border);font-size:13px;color:var(--muted);text-align:center;line-height:1.7;">
-      Não tem conta CEFIS?<br>
-      <a href="https://cefis.com.br" target="_blank" style="color:var(--accent2);font-weight:600;">Criar conta gratuita em cefis.com.br</a>
-    </div>
+    <form id="registerForm" class="hidden" onsubmit="handleRegister(event)">
+      <div class="auth-title">Crie sua conta.</div>
+      <div class="auth-sub">Inicie sua jornada personalizada de estudos.</div>
+      <div id="registerAlert" class="alert"></div>
+
+      <div class="input-stack">
+        <input type="text" class="input" id="regName" placeholder="Seu nome completo" autocomplete="name" required/>
+        <input type="email" class="input" id="regEmail" placeholder="Seu email CEFIS" autocomplete="email" required/>
+        <input type="password" class="input" id="regPass" placeholder="Crie uma senha" autocomplete="new-password" required minlength="6"/>
+        <input type="password" class="input" id="regConfPass" placeholder="Confirme a senha" autocomplete="new-password" required minlength="6"/>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full" id="registerBtn">Criar conta</button>
+      <button type="button" class="link-btn" onclick="toggleAuth('login')">Já tenho conta. Fazer login</button>
+    </form>
+
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     ONBOARDING
-══════════════════════════════════════════ -->
 <div id="onboarding" class="onboarding-overlay hidden">
   <div class="ob-card glass fade-in">
     <div class="ob-title">Como você aprende melhor?</div>
@@ -574,12 +580,8 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     DASHBOARD
-══════════════════════════════════════════ -->
 <div id="dashboard" class="app hidden">
 
-  <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="sidebar-brand">
       <div class="brand-logo" style="margin-bottom:0;">
@@ -622,10 +624,8 @@
     </div>
   </aside>
 
-  <!-- MAIN -->
   <main class="main">
 
-    <!-- HOME -->
     <div id="page-home" class="page active">
       <div class="hero-card fade-in">
         <div class="hero-eyebrow">Bem-vindo de volta</div>
@@ -661,7 +661,6 @@
       </div>
     </div>
 
-    <!-- CHAT -->
     <div id="page-chat" class="page">
       <div class="chat-layout">
 
@@ -700,7 +699,6 @@
       </div>
     </div>
 
-    <!-- COURSES -->
     <div id="page-courses" class="page">
       <div class="page-title">Catálogo de Cursos</div>
       <div class="page-sub">Explore os cursos disponíveis na plataforma CEFIS</div>
@@ -712,7 +710,6 @@
       <div id="coursePager" style="display:flex;gap:10px;justify-content:center;margin-top:24px;flex-wrap:wrap;"></div>
     </div>
 
-    <!-- TRACKS -->
     <div id="page-tracks" class="page">
       <div class="page-title">Trilhas de Conhecimento</div>
       <div class="page-sub">Sequências de estudo estruturadas pela CEFIS</div>
@@ -720,7 +717,6 @@
       <div id="tracksMsg" class="loader-text">Carregando trilhas…</div>
     </div>
 
-    <!-- CERTIFICATES -->
     <div id="page-certificates" class="page">
       <div class="page-title">Meus Certificados</div>
       <div class="page-sub">Cursos concluídos com certificação</div>
@@ -735,7 +731,7 @@
 // ══════════════════════════════════════════════════════════
 // CONFIG
 // ══════════════════════════════════════════════════════════
-const API_BASE   = ""           // mesmo origin do server.js Express
+const API_BASE   = ""            // mesmo origin do server.js Express
 const STYLE_KEY  = "profAI_style_v2"
 const SESSION_KEY= "profAI_session_v2"
 
@@ -774,14 +770,14 @@ window.addEventListener("load", () => {
       }
     }
   } catch(e) {}
-  show("loginScreen")
+  show("authScreen")
 })
 
 // ══════════════════════════════════════════════════════════
 // SCREEN HELPERS
 // ══════════════════════════════════════════════════════════
 function show(id) {
-  ["loginScreen","dashboard"].forEach(s => {
+  ["authScreen","dashboard"].forEach(s => {
     const el = document.getElementById(s)
     if (el) el.classList.add("hidden")
   })
@@ -814,8 +810,20 @@ function goTo(pageId) {
 }
 
 // ══════════════════════════════════════════════════════════
-// LOGIN — via servidor Express (proxy CEFIS)
+// LOGIN & REGISTRO — via servidor Express
 // ══════════════════════════════════════════════════════════
+function toggleAuth(type) {
+  if (type === 'register') {
+    eid('loginForm').classList.add('hidden')
+    eid('registerForm').classList.remove('hidden')
+    hideAlert("registerAlert")
+  } else {
+    eid('registerForm').classList.add('hidden')
+    eid('loginForm').classList.remove('hidden')
+    hideAlert("loginAlert")
+  }
+}
+
 async function handleLogin(e) {
   e.preventDefault()
   const btn   = document.getElementById("loginBtn")
@@ -841,6 +849,42 @@ async function handleLogin(e) {
     showAlert("loginAlert", "Email ou senha incorretos. Verifique suas credenciais CEFIS.")
   } finally {
     resetBtn(btn, "Entrar na plataforma")
+  }
+}
+
+async function handleRegister(e) {
+  e.preventDefault()
+  const btn   = document.getElementById("registerBtn")
+  const name  = document.getElementById("regName").value.trim()
+  const email = document.getElementById("regEmail").value.trim()
+  const pass  = document.getElementById("regPass").value
+  const conf  = document.getElementById("regConfPass").value
+  
+  hideAlert("registerAlert")
+
+  if (pass !== conf) {
+    return showAlert("registerAlert", "As senhas não coincidem. Tente novamente.")
+  }
+
+  setBtn(btn, "Criando conta…")
+
+  try {
+    // ATENÇÃO: Você precisa garantir que a rota /auth/register exista no backend!
+    const res  = await post("/auth/register", { name, email, pass })
+    const key  = res?.data?.key
+    const user = res?.data?.user
+    if (!key) throw new Error("sem key")
+
+    S.apiKey        = key
+    S.user          = user
+    S.learningStyle = "" // Garante que o onboarding apareça para novas contas
+    saveSession()
+
+    showOnboarding()
+  } catch(err) {
+    showAlert("registerAlert", "Não foi possível criar a conta. Verifique os dados ou tente mais tarde.")
+  } finally {
+    resetBtn(btn, "Criar conta")
   }
 }
 
@@ -1096,7 +1140,9 @@ function initChatWelcome() {
 }
 
 async function sendMessage(e) {
-  e.preventDefault()
+  // Se 'e' possuir preventDefault, executa para evitar recarregar a tela
+  if (e && typeof e.preventDefault === 'function') e.preventDefault()
+
   const input = eid("chatInput")
   const btn   = eid("sendBtn")
   const text  = input.value.trim()
@@ -1134,13 +1180,9 @@ async function sendMessage(e) {
 }
 
 function inject(text) {
+  // Correção: Agora preenchemos o input e chamamos a função que envia a mensagem de forma segura
   eid("chatInput").value = text
-  document.querySelector(".chat-input-row").dispatchEvent(
-    Object.assign(new Event("submit"), { preventDefault: () => {} })
-  )
-  // fallback seguro
-  eid("chatInput").value = text
-  sendMessage({ preventDefault: ()=>{}, target: null })
+  sendMessage({ preventDefault: () => {} })
 }
 
 function addMsg(role, text) {
@@ -1168,9 +1210,16 @@ function addTyping() {
 // ══════════════════════════════════════════════════════════
 function handleLogout() {
   sessionStorage.removeItem(SESSION_KEY)
+  
+  // Reseta os inputs de login para segurança do usuário
+  eid("loginEmail").value = ""
+  eid("loginPassword").value = ""
+
   S = { apiKey:null, user:null, learningStyle:null, chatHistory:[], courses:[], tracks:[], certs:[], coursePage:1, courseTotal:0, avgAcc:0, searchTimer:null, loaded:{courses:false,tracks:false,certs:false} }
   eid("messages").innerHTML = ""
-  show("loginScreen")
+  
+  toggleAuth('login') // Garante que a tela inicial seja a de Login
+  show("authScreen")
 }
 
 // ══════════════════════════════════════════════════════════
