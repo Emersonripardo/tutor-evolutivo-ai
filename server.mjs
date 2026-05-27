@@ -35,31 +35,40 @@ app.post("/chat", async (req,res)=>{
 
     const { messages } = req.body
 
+    const lastMessage =
+    messages[messages.length - 1].content
+
     const response =
     await fetch(
-      "https://api.x.ai/v1/chat/completions",
+
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+
       {
 
         method:"POST",
 
         headers:{
-          "Content-Type":"application/json",
-
-          "Authorization":
-          `Bearer ${process.env.XAI_API_KEY}`
+          "Content-Type":"application/json"
         },
 
         body:JSON.stringify({
 
-          model:"grok-beta",
+          contents:[
 
-          messages,
+            {
+              parts:[
+                {
+                  text:lastMessage
+                }
+              ]
+            }
 
-          temperature:0.7
+          ]
 
         })
 
       }
+
     )
 
     const data =
@@ -69,19 +78,22 @@ app.post("/chat", async (req,res)=>{
       JSON.stringify(data,null,2)
     )
 
-    if(data.error){
+    const text =
+    data?.candidates?.[0]?.content?.parts?.[0]?.text
+    ||
+    "Não consegui responder."
 
-      console.error(data.error)
+    res.json({
 
-      return res.status(500).json({
+      choices:[
+        {
+          message:{
+            content:text
+          }
+        }
+      ]
 
-        error:data.error.message
-
-      })
-
-    }
-
-    res.json(data)
+    })
 
   }catch(error){
 
@@ -89,7 +101,7 @@ app.post("/chat", async (req,res)=>{
 
     res.status(500).json({
 
-      error:"Erro servidor"
+      error:"Erro Gemini"
 
     })
 
